@@ -49,6 +49,7 @@ export default async function Home() {
                 name={personalInfo.name}
                 title={personalInfo.title}
                 tagline={personalInfo.careerObjective.split('.')[0] + '.'}
+                socialLinks={personalInfo.socialLinks}
             />
 
             {/* Content Sections */}

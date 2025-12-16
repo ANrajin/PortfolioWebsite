@@ -4,13 +4,16 @@ import { useEffect, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import SocialLinks from './SocialLinks';
 
+import type { SocialLink } from '@portfolio/shared';
+
 interface HeroSectionProps {
     name: string;
     title: string;
     tagline: string;
+    socialLinks?: SocialLink[];
 }
 
-const HeroSection: React.FC<HeroSectionProps> = ({ name, title, tagline }) => {
+const HeroSection: React.FC<HeroSectionProps> = ({ name, title, tagline, socialLinks }) => {
     const [displayedText, setDisplayedText] = useState('');
     const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -87,7 +90,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ name, title, tagline }) => {
 
                 {/* Social Links */}
                 <div className="mb-12 animate-fade-in">
-                    <SocialLinks />
+                    <SocialLinks links={socialLinks} />
                 </div>
 
                 {/* CTA Buttons */}
