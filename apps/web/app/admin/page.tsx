@@ -7,47 +7,66 @@ import {
     FileText
 } from 'lucide-react';
 import Link from 'next/link';
+import { getPortfolio } from '@/lib/api';
 import { dummyData } from '@/data/dummy';
 
-const stats = [
-    {
-        label: 'Experiences',
-        count: dummyData.experiences.length,
-        icon: Briefcase,
-        href: '/admin/experiences',
-        color: 'bg-blue-500/10 text-blue-400 border-blue-500/20'
-    },
-    {
-        label: 'Skills',
-        count: dummyData.skills.length,
-        icon: Code2,
-        href: '/admin/skills',
-        color: 'bg-green-500/10 text-green-400 border-green-500/20'
-    },
-    {
-        label: 'Projects',
-        count: dummyData.projects.length,
-        icon: FolderGit2,
-        href: '/admin/projects',
-        color: 'bg-purple-500/10 text-purple-400 border-purple-500/20'
-    },
-    {
-        label: 'Education',
-        count: dummyData.education.length,
-        icon: GraduationCap,
-        href: '/admin/education',
-        color: 'bg-orange-500/10 text-orange-400 border-orange-500/20'
-    },
-    {
-        label: 'Articles',
-        count: dummyData.articles.length,
-        icon: FileText,
-        href: '/admin/articles',
-        color: 'bg-rose-500/10 text-rose-400 border-rose-500/20'
-    },
-];
+export const dynamic = 'force-dynamic';
 
-export default function AdminDashboard() {
+export default async function AdminDashboard() {
+    let data;
+
+    try {
+        data = await getPortfolio();
+    } catch (error) {
+        console.warn('Failed to fetch from API, using dummy data:', error);
+        data = dummyData;
+    }
+
+    // Fallback to dummy data if API returns null
+    if (!data.personalInfo) {
+        data = dummyData;
+    }
+
+    const { personalInfo, experiences, skills, projects, education, articles } = data;
+
+    const stats = [
+        {
+            label: 'Experiences',
+            count: experiences.length,
+            icon: Briefcase,
+            href: '/admin/experiences',
+            color: 'bg-blue-500/10 text-blue-400 border-blue-500/20'
+        },
+        {
+            label: 'Skills',
+            count: skills.length,
+            icon: Code2,
+            href: '/admin/skills',
+            color: 'bg-green-500/10 text-green-400 border-green-500/20'
+        },
+        {
+            label: 'Projects',
+            count: projects.length,
+            icon: FolderGit2,
+            href: '/admin/projects',
+            color: 'bg-purple-500/10 text-purple-400 border-purple-500/20'
+        },
+        {
+            label: 'Education',
+            count: education.length,
+            icon: GraduationCap,
+            href: '/admin/education',
+            color: 'bg-orange-500/10 text-orange-400 border-orange-500/20'
+        },
+        {
+            label: 'Articles',
+            count: articles.length,
+            icon: FileText,
+            href: '/admin/articles',
+            color: 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+        },
+    ];
+
     return (
         <div className="max-w-4xl mx-auto">
             <div className="mb-8">
@@ -125,12 +144,12 @@ export default function AdminDashboard() {
                 <h3 className="text-lg font-semibold text-slate-100 mb-4">Profile Overview</h3>
                 <div className="flex items-start gap-4">
                     <div className="w-16 h-16 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-2xl font-bold text-slate-900">
-                        {dummyData.personalInfo.name.charAt(0)}
+                        {personalInfo.name.charAt(0)}
                     </div>
                     <div>
-                        <h4 className="text-xl font-semibold text-slate-100">{dummyData.personalInfo.name}</h4>
-                        <p className="text-teal-400">{dummyData.personalInfo.title}</p>
-                        <p className="text-slate-400 text-sm mt-2">{dummyData.personalInfo.email}</p>
+                        <h4 className="text-xl font-semibold text-slate-100">{personalInfo.name}</h4>
+                        <p className="text-teal-400">{personalInfo.title}</p>
+                        <p className="text-slate-400 text-sm mt-2">{personalInfo.email}</p>
                     </div>
                 </div>
             </div>

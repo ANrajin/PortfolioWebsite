@@ -42,17 +42,18 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({ skills }) => {
                     {categories.map((category) => {
                         const colors = categoryColors[category] || categoryColors.languages;
                         const isActive = activeCategory === category;
+                        const count = groupedSkills[category]?.length || 0;
 
                         return (
                             <button
                                 key={category}
                                 onClick={() => setActiveCategory(category)}
                                 className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 border ${isActive
-                                        ? `${colors.bg} ${colors.text} ${colors.border} shadow-lg`
-                                        : 'bg-slate-800/50 text-slate-400 border-slate-700 hover:border-slate-600 hover:text-slate-300'
+                                    ? `${colors.bg} ${colors.text} ${colors.border} shadow-lg`
+                                    : 'bg-slate-800/50 text-slate-400 border-slate-700 hover:border-slate-600 hover:text-slate-300'
                                     }`}
                             >
-                                {SKILL_CATEGORIES[category]}
+                                {SKILL_CATEGORIES[category]} ({count})
                             </button>
                         );
                     })}
@@ -74,30 +75,6 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({ skills }) => {
                             );
                         })}
                     </div>
-                </div>
-
-                {/* All Skills Overview */}
-                <div className="mt-8 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                    {categories.map((category) => {
-                        const colors = categoryColors[category] || categoryColors.languages;
-                        const count = groupedSkills[category]?.length || 0;
-
-                        return (
-                            <div
-                                key={category}
-                                className={`text-center p-4 rounded-lg border cursor-pointer transition-all duration-300 hover:scale-105 ${activeCategory === category
-                                        ? `${colors.bg} ${colors.border}`
-                                        : 'bg-slate-800/30 border-slate-700/50 hover:border-slate-600'
-                                    }`}
-                                onClick={() => setActiveCategory(category)}
-                            >
-                                <div className={`text-2xl font-bold ${colors.text}`}>{count}</div>
-                                <div className="text-xs text-slate-400 mt-1">
-                                    {SKILL_CATEGORIES[category]}
-                                </div>
-                            </div>
-                        );
-                    })}
                 </div>
             </div>
         </section>

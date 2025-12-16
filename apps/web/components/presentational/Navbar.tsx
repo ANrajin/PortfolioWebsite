@@ -40,72 +40,81 @@ const Navbar: React.FC = () => {
     };
 
     return (
-        <nav
-            className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled
+        <>
+            <nav
+                className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled
                     ? 'glass shadow-lg py-3'
                     : 'bg-transparent py-6'
-                }`}
-        >
-            <div className="max-w-7xl mx-auto px-4 md:px-8">
-                <div className="flex items-center justify-between">
-                    {/* Logo */}
-                    <a
-                        href="#"
-                        className="text-2xl font-bold gradient-text"
-                        onClick={(e) => {
-                            e.preventDefault();
-                            window.scrollTo({ top: 0, behavior: 'smooth' });
-                        }}
-                    >
-                        &lt;Dev /&gt;
-                    </a>
+                    }`}
+            >
+                <div className="max-w-7xl mx-auto px-4 md:px-8">
+                    <div className="flex items-center justify-between">
+                        {/* Logo */}
+                        <a
+                            href="#"
+                            className="text-2xl font-bold gradient-text"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                            }}
+                        >
+                            &lt;RAJIN /&gt;
+                        </a>
 
-                    {/* Desktop Navigation */}
-                    <div className="hidden md:flex items-center gap-8">
-                        {NAVIGATION_ITEMS.map((item) => (
-                            <button
-                                key={item.id}
-                                onClick={() => handleNavClick(item.id)}
-                                className={`text-sm font-medium transition-colors duration-300 ${activeSection === item.id
-                                        ? 'text-teal-400'
-                                        : 'text-slate-300 hover:text-teal-400'
-                                    }`}
-                            >
-                                {item.label}
-                            </button>
-                        ))}
-                    </div>
-
-                    {/* Mobile Menu Button */}
-                    <button
-                        className="md:hidden text-slate-300 hover:text-teal-400 transition-colors"
-                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                    >
-                        {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-                    </button>
-                </div>
-
-                {/* Mobile Navigation */}
-                {isMobileMenuOpen && (
-                    <div className="md:hidden mt-4 pb-4 animate-slide-down">
-                        <div className="flex flex-col gap-4">
+                        {/* Desktop Navigation */}
+                        <div className="hidden md:flex items-center gap-8">
                             {NAVIGATION_ITEMS.map((item) => (
                                 <button
                                     key={item.id}
                                     onClick={() => handleNavClick(item.id)}
-                                    className={`text-sm font-medium transition-colors duration-300 text-left ${activeSection === item.id
-                                            ? 'text-teal-400'
-                                            : 'text-slate-300 hover:text-teal-400'
+                                    className={`text-sm font-medium transition-colors duration-300 ${activeSection === item.id
+                                        ? 'text-teal-400'
+                                        : 'text-slate-300 hover:text-teal-400'
                                         }`}
                                 >
                                     {item.label}
                                 </button>
                             ))}
                         </div>
+
+                        {/* Mobile Menu Button */}
+                        <button
+                            className="md:hidden text-slate-300 hover:text-teal-400 transition-colors z-50"
+                            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                        >
+                            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                        </button>
                     </div>
-                )}
-            </div>
-        </nav>
+                </div>
+            </nav>
+
+            {/* Mobile Navigation Overlay */}
+            {isMobileMenuOpen && (
+                <div className="fixed inset-0 z-40 md:hidden">
+                    {/* Backdrop */}
+                    <div
+                        className="absolute inset-0 bg-slate-950/95 backdrop-blur-lg"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                    />
+
+                    {/* Menu Content */}
+                    <div className="relative z-50 flex flex-col items-center justify-center h-full gap-8 animate-fade-in">
+                        {NAVIGATION_ITEMS.map((item) => (
+                            <button
+                                key={item.id}
+                                onClick={() => handleNavClick(item.id)}
+                                className={`text-xl font-medium transition-colors duration-300 ${activeSection === item.id
+                                    ? 'text-teal-400'
+                                    : 'text-slate-300 hover:text-teal-400'
+                                    }`}
+                            >
+                                {item.label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </>
     );
 };
 

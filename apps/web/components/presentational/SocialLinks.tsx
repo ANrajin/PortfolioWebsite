@@ -41,10 +41,16 @@ const SocialLinks: React.FC<SocialLinksProps> = ({ links = defaultLinks, size = 
                         href={link.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="p-3 bg-slate-800/50 border border-slate-700 rounded-lg text-slate-400 hover:text-teal-400 hover:border-teal-500/50 hover:bg-slate-800 transition-all duration-300"
+                        className="relative group p-3 bg-slate-800/50 border border-slate-700 rounded-lg text-slate-400 hover:text-teal-400 hover:border-teal-500/50 hover:bg-slate-800 transition-all duration-300"
                         aria-label={link.label}
                     >
                         <Icon size={iconSize} />
+                        {/* Tooltip */}
+                        <span className="absolute -bottom-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-800 text-slate-200 text-xs rounded-md whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 border border-slate-700 shadow-lg">
+                            {link.label}
+                            {/* Arrow */}
+                            <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-800 border-l border-t border-slate-700 rotate-45" />
+                        </span>
                     </a>
                 );
             })}

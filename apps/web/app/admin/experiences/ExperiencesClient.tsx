@@ -13,12 +13,14 @@ export default function ExperiencesClient({ initialData }: ExperiencesClientProp
     const [experiences, setExperiences] = useState(initialData);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [formData, setFormData] = useState<Partial<Experience>>({});
+    const [techInput, setTechInput] = useState('');
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
     const handleEdit = (exp: Experience) => {
         setEditingId(exp.id);
         setFormData(exp);
+        setTechInput(exp.technologies?.join(', ') || '');
         setMessage(null);
     };
 
@@ -36,6 +38,7 @@ export default function ExperiencesClient({ initialData }: ExperiencesClientProp
         setExperiences([newExp, ...experiences]);
         setEditingId(newExp.id);
         setFormData(newExp);
+        setTechInput('');
         setMessage(null);
     };
 
@@ -52,10 +55,16 @@ export default function ExperiencesClient({ initialData }: ExperiencesClientProp
             if (isNew) {
                 // Create new experience
                 const { id, ...data } = formData as Experience;
-                savedExp = await createExperience(data);
+                savedExp = await createExperience({
+                    ...data,
+                    technologies: techInput.split(',').map(t => t.trim()).filter(Boolean)
+                });
             } else {
                 // Update existing
-                savedExp = await updateExperience(editingId, formData);
+                savedExp = await updateExperience(editingId, {
+                    ...formData,
+                    technologies: techInput.split(',').map(t => t.trim()).filter(Boolean)
+                });
             }
 
             setExperiences(experiences.map(exp =>
@@ -63,6 +72,7 @@ export default function ExperiencesClient({ initialData }: ExperiencesClientProp
             ));
             setEditingId(null);
             setFormData({});
+            setTechInput('');
             setMessage({ type: 'success', text: isNew ? 'Experience created!' : 'Experience updated!' });
         } catch (error) {
             console.error('Error saving:', error);
@@ -98,6 +108,7 @@ export default function ExperiencesClient({ initialData }: ExperiencesClientProp
         }
         setEditingId(null);
         setFormData({});
+        setTechInput('');
     };
 
     return (
@@ -120,8 +131,8 @@ export default function ExperiencesClient({ initialData }: ExperiencesClientProp
             {/* Status Message */}
             {message && (
                 <div className={`flex items-center gap-2 p-4 rounded-lg mb-4 ${message.type === 'success'
-                        ? 'bg-green-500/10 text-green-400 border border-green-500/20'
-                        : 'bg-red-500/10 text-red-400 border border-red-500/20'
+                    ? 'bg-green-500/10 text-green-400 border border-green-500/20'
+                    : 'bg-red-500/10 text-red-400 border border-red-500/20'
                     }`}>
                     {message.type === 'success' ? <CheckCircle size={18} /> : <XCircle size={18} />}
                     {message.text}
@@ -202,8 +213,8 @@ export default function ExperiencesClient({ initialData }: ExperiencesClientProp
                                     <label className="block text-sm font-medium text-slate-400 mb-1">Technologies (comma-separated)</label>
                                     <input
                                         type="text"
-                                        value={formData.technologies?.join(', ') || ''}
-                                        onChange={(e) => setFormData({ ...formData, technologies: e.target.value.split(',').map(t => t.trim()).filter(Boolean) })}
+                                        value={techInput}
+                                        onChange={(e) => setTechInput(e.target.value)}
                                         placeholder="React, Node.js, TypeScript"
                                         className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500"
                                     />

@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Roboto, Roboto_Mono } from 'next/font/google';
 import './globals.css';
 
@@ -14,12 +14,16 @@ const robotoMono = Roboto_Mono({
     weight: ['400', '500', '700'],
 });
 
+export const viewport: Viewport = {
+    width: 'device-width',
+    initialScale: 1,
+};
+
 export const metadata: Metadata = {
     title: 'Software Engineer Portfolio',
     description: 'Professional portfolio showcasing my work as a Software Engineer',
     keywords: ['Software Engineer', 'Portfolio', 'Developer', 'Full Stack'],
     authors: [{ name: 'Software Engineer' }],
-    viewport: 'width=device-width, initial-scale=1',
 };
 
 export default function RootLayout({

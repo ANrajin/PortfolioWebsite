@@ -13,12 +13,14 @@ export default function ProjectsClient({ initialData }: ProjectsClientProps) {
     const [projects, setProjects] = useState(initialData);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [formData, setFormData] = useState<Partial<Project>>({});
+    const [techInput, setTechInput] = useState('');
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
     const handleEdit = (project: Project) => {
         setEditingId(project.id);
         setFormData(project);
+        setTechInput(project.technologies?.join(', ') || '');
         setMessage(null);
     };
 
@@ -33,6 +35,7 @@ export default function ProjectsClient({ initialData }: ProjectsClientProps) {
         setProjects([newProject, ...projects]);
         setEditingId(newProject.id);
         setFormData(newProject);
+        setTechInput('');
         setMessage(null);
     };
 
@@ -48,9 +51,15 @@ export default function ProjectsClient({ initialData }: ProjectsClientProps) {
 
             if (isNew) {
                 const { id, ...data } = formData as Project;
-                savedProject = await createProject(data);
+                savedProject = await createProject({
+                    ...data,
+                    technologies: techInput.split(',').map(t => t.trim()).filter(Boolean)
+                });
             } else {
-                savedProject = await updateProject(editingId, formData);
+                savedProject = await updateProject(editingId, {
+                    ...formData,
+                    technologies: techInput.split(',').map(t => t.trim()).filter(Boolean)
+                });
             }
 
             setProjects(projects.map(p =>
@@ -58,6 +67,7 @@ export default function ProjectsClient({ initialData }: ProjectsClientProps) {
             ));
             setEditingId(null);
             setFormData({});
+            setTechInput('');
             setMessage({ type: 'success', text: isNew ? 'Project created!' : 'Project updated!' });
         } catch (error) {
             console.error('Error saving:', error);
@@ -93,6 +103,7 @@ export default function ProjectsClient({ initialData }: ProjectsClientProps) {
         }
         setEditingId(null);
         setFormData({});
+        setTechInput('');
     };
 
     return (
@@ -115,8 +126,8 @@ export default function ProjectsClient({ initialData }: ProjectsClientProps) {
             {/* Status Message */}
             {message && (
                 <div className={`flex items-center gap-2 p-4 rounded-lg mb-4 ${message.type === 'success'
-                        ? 'bg-green-500/10 text-green-400 border border-green-500/20'
-                        : 'bg-red-500/10 text-red-400 border border-red-500/20'
+                    ? 'bg-green-500/10 text-green-400 border border-green-500/20'
+                    : 'bg-red-500/10 text-red-400 border border-red-500/20'
                     }`}>
                     {message.type === 'success' ? <CheckCircle size={18} /> : <XCircle size={18} />}
                     {message.text}
@@ -163,8 +174,8 @@ export default function ProjectsClient({ initialData }: ProjectsClientProps) {
                                     <label className="block text-sm font-medium text-slate-400 mb-1">Technologies (comma-separated)</label>
                                     <input
                                         type="text"
-                                        value={formData.technologies?.join(', ') || ''}
-                                        onChange={(e) => setFormData({ ...formData, technologies: e.target.value.split(',').map(t => t.trim()).filter(Boolean) })}
+                                        value={techInput}
+                                        onChange={(e) => setTechInput(e.target.value)}
                                         placeholder="React, Node.js, PostgreSQL"
                                         className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500"
                                     />
