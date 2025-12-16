@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, Pencil, Trash2, X, Save } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, Save, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import type { Education } from '@portfolio/shared';
+import { createEducation, updateEducation, deleteEducation } from '@/lib/api';
 
 interface EducationClientProps {
     initialData: Education[];
@@ -12,15 +13,18 @@ export default function EducationClient({ initialData }: EducationClientProps) {
     const [education, setEducation] = useState(initialData);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [formData, setFormData] = useState<Partial<Education>>({});
+    const [saving, setSaving] = useState(false);
+    const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
     const handleEdit = (edu: Education) => {
         setEditingId(edu.id);
         setFormData(edu);
+        setMessage(null);
     };
 
     const handleAdd = () => {
         const newEdu: Education = {
-            id: Date.now().toString(),
+            id: 'new-' + Date.now().toString(),
             institution: '',
             degree: '',
             field: '',
@@ -32,26 +36,62 @@ export default function EducationClient({ initialData }: EducationClientProps) {
         setEducation([newEdu, ...education]);
         setEditingId(newEdu.id);
         setFormData(newEdu);
+        setMessage(null);
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (!editingId) return;
 
-        setEducation(education.map(edu =>
-            edu.id === editingId ? { ...edu, ...formData } as Education : edu
-        ));
-        setEditingId(null);
-        setFormData({});
+        setSaving(true);
+        setMessage(null);
+
+        try {
+            const isNew = editingId.startsWith('new-');
+            let savedEdu: Education;
+
+            if (isNew) {
+                const { id, ...data } = formData as Education;
+                savedEdu = await createEducation(data);
+            } else {
+                savedEdu = await updateEducation(editingId, formData);
+            }
+
+            setEducation(education.map(edu =>
+                edu.id === editingId ? savedEdu : edu
+            ));
+            setEditingId(null);
+            setFormData({});
+            setMessage({ type: 'success', text: isNew ? 'Education added!' : 'Education updated!' });
+        } catch (error) {
+            console.error('Error saving:', error);
+            setMessage({ type: 'error', text: 'Failed to save. Please try again.' });
+        } finally {
+            setSaving(false);
+        }
     };
 
-    const handleDelete = (id: string) => {
-        if (confirm('Are you sure you want to delete this education entry?')) {
+    const handleDelete = async (id: string) => {
+        if (!confirm('Are you sure you want to delete this education entry?')) return;
+
+        setSaving(true);
+        setMessage(null);
+
+        try {
+            if (!id.startsWith('new-')) {
+                await deleteEducation(id);
+            }
             setEducation(education.filter(edu => edu.id !== id));
+            setMessage({ type: 'success', text: 'Education deleted!' });
+        } catch (error) {
+            console.error('Error deleting:', error);
+            setMessage({ type: 'error', text: 'Failed to delete. Please try again.' });
+        } finally {
+            setSaving(false);
         }
     };
 
     const handleCancel = () => {
-        if (formData.institution === '') {
+        if (editingId?.startsWith('new-')) {
             setEducation(education.filter(edu => edu.id !== editingId));
         }
         setEditingId(null);
@@ -67,12 +107,24 @@ export default function EducationClient({ initialData }: EducationClientProps) {
                 </div>
                 <button
                     onClick={handleAdd}
-                    className="flex items-center gap-2 px-4 py-2 bg-teal-500 text-slate-900 font-medium rounded-lg hover:bg-teal-400 transition-colors"
+                    disabled={saving}
+                    className="flex items-center gap-2 px-4 py-2 bg-teal-500 text-slate-900 font-medium rounded-lg hover:bg-teal-400 transition-colors disabled:opacity-50"
                 >
                     <Plus size={18} />
                     Add Education
                 </button>
             </div>
+
+            {/* Status Message */}
+            {message && (
+                <div className={`flex items-center gap-2 p-4 rounded-lg mb-4 ${message.type === 'success'
+                        ? 'bg-green-500/10 text-green-400 border border-green-500/20'
+                        : 'bg-red-500/10 text-red-400 border border-red-500/20'
+                    }`}>
+                    {message.type === 'success' ? <CheckCircle size={18} /> : <XCircle size={18} />}
+                    {message.text}
+                </div>
+            )}
 
             <div className="space-y-4">
                 {education.map((edu) => (
@@ -162,17 +214,19 @@ export default function EducationClient({ initialData }: EducationClientProps) {
                                 <div className="flex justify-end gap-2">
                                     <button
                                         onClick={handleCancel}
-                                        className="flex items-center gap-2 px-4 py-2 text-slate-400 hover:text-slate-200 transition-colors"
+                                        disabled={saving}
+                                        className="flex items-center gap-2 px-4 py-2 text-slate-400 hover:text-slate-200 transition-colors disabled:opacity-50"
                                     >
                                         <X size={18} />
                                         Cancel
                                     </button>
                                     <button
                                         onClick={handleSave}
-                                        className="flex items-center gap-2 px-4 py-2 bg-teal-500 text-slate-900 font-medium rounded-lg hover:bg-teal-400 transition-colors"
+                                        disabled={saving}
+                                        className="flex items-center gap-2 px-4 py-2 bg-teal-500 text-slate-900 font-medium rounded-lg hover:bg-teal-400 transition-colors disabled:opacity-50"
                                     >
-                                        <Save size={18} />
-                                        Save
+                                        {saving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+                                        {saving ? 'Saving...' : 'Save'}
                                     </button>
                                 </div>
                             </div>
@@ -180,12 +234,14 @@ export default function EducationClient({ initialData }: EducationClientProps) {
                             <div className="flex items-start justify-between">
                                 <div className="flex-1">
                                     <div className="flex items-center gap-2">
-                                        <h3 className="text-lg font-semibold text-slate-100">{edu.degree} in {edu.field}</h3>
+                                        <h3 className="text-lg font-semibold text-slate-100">
+                                            {edu.degree ? `${edu.degree} in ${edu.field}` : 'Untitled'}
+                                        </h3>
                                         {edu.current && (
                                             <span className="px-2 py-0.5 text-xs bg-teal-500/10 text-teal-400 rounded">Current</span>
                                         )}
                                     </div>
-                                    <p className="text-teal-400">{edu.institution}</p>
+                                    <p className="text-teal-400">{edu.institution || 'No institution'}</p>
                                     <p className="text-sm text-slate-400 mt-1">
                                         {edu.startYear} — {edu.current ? 'Present' : edu.endYear}
                                     </p>
@@ -196,13 +252,15 @@ export default function EducationClient({ initialData }: EducationClientProps) {
                                 <div className="flex gap-2 ml-4">
                                     <button
                                         onClick={() => handleEdit(edu)}
-                                        className="p-2 text-slate-400 hover:text-teal-400 hover:bg-slate-800 rounded-lg transition-colors"
+                                        disabled={saving}
+                                        className="p-2 text-slate-400 hover:text-teal-400 hover:bg-slate-800 rounded-lg transition-colors disabled:opacity-50"
                                     >
                                         <Pencil size={18} />
                                     </button>
                                     <button
                                         onClick={() => handleDelete(edu.id)}
-                                        className="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded-lg transition-colors"
+                                        disabled={saving}
+                                        className="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded-lg transition-colors disabled:opacity-50"
                                     >
                                         <Trash2 size={18} />
                                     </button>

@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, Pencil, Trash2, X, Save, ExternalLink } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, Save, ExternalLink, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import type { Article } from '@portfolio/shared';
+import { createArticle, updateArticle, deleteArticle } from '@/lib/api';
 
 interface ArticlesClientProps {
     initialData: Article[];
@@ -12,15 +13,18 @@ export default function ArticlesClient({ initialData }: ArticlesClientProps) {
     const [articles, setArticles] = useState(initialData);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [formData, setFormData] = useState<Partial<Article>>({});
+    const [saving, setSaving] = useState(false);
+    const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
     const handleEdit = (article: Article) => {
         setEditingId(article.id);
         setFormData(article);
+        setMessage(null);
     };
 
     const handleAdd = () => {
         const newArticle: Article = {
-            id: Date.now().toString(),
+            id: 'new-' + Date.now().toString(),
             title: '',
             platform: '',
             url: '',
@@ -30,26 +34,62 @@ export default function ArticlesClient({ initialData }: ArticlesClientProps) {
         setArticles([newArticle, ...articles]);
         setEditingId(newArticle.id);
         setFormData(newArticle);
+        setMessage(null);
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (!editingId) return;
 
-        setArticles(articles.map(a =>
-            a.id === editingId ? { ...a, ...formData } as Article : a
-        ));
-        setEditingId(null);
-        setFormData({});
+        setSaving(true);
+        setMessage(null);
+
+        try {
+            const isNew = editingId.startsWith('new-');
+            let savedArticle: Article;
+
+            if (isNew) {
+                const { id, ...data } = formData as Article;
+                savedArticle = await createArticle(data);
+            } else {
+                savedArticle = await updateArticle(editingId, formData);
+            }
+
+            setArticles(articles.map(a =>
+                a.id === editingId ? savedArticle : a
+            ));
+            setEditingId(null);
+            setFormData({});
+            setMessage({ type: 'success', text: isNew ? 'Article added!' : 'Article updated!' });
+        } catch (error) {
+            console.error('Error saving:', error);
+            setMessage({ type: 'error', text: 'Failed to save. Please try again.' });
+        } finally {
+            setSaving(false);
+        }
     };
 
-    const handleDelete = (id: string) => {
-        if (confirm('Are you sure you want to delete this article?')) {
+    const handleDelete = async (id: string) => {
+        if (!confirm('Are you sure you want to delete this article?')) return;
+
+        setSaving(true);
+        setMessage(null);
+
+        try {
+            if (!id.startsWith('new-')) {
+                await deleteArticle(id);
+            }
             setArticles(articles.filter(a => a.id !== id));
+            setMessage({ type: 'success', text: 'Article deleted!' });
+        } catch (error) {
+            console.error('Error deleting:', error);
+            setMessage({ type: 'error', text: 'Failed to delete. Please try again.' });
+        } finally {
+            setSaving(false);
         }
     };
 
     const handleCancel = () => {
-        if (formData.title === '') {
+        if (editingId?.startsWith('new-')) {
             setArticles(articles.filter(a => a.id !== editingId));
         }
         setEditingId(null);
@@ -70,12 +110,24 @@ export default function ArticlesClient({ initialData }: ArticlesClientProps) {
                 </div>
                 <button
                     onClick={handleAdd}
-                    className="flex items-center gap-2 px-4 py-2 bg-teal-500 text-slate-900 font-medium rounded-lg hover:bg-teal-400 transition-colors"
+                    disabled={saving}
+                    className="flex items-center gap-2 px-4 py-2 bg-teal-500 text-slate-900 font-medium rounded-lg hover:bg-teal-400 transition-colors disabled:opacity-50"
                 >
                     <Plus size={18} />
                     Add Article
                 </button>
             </div>
+
+            {/* Status Message */}
+            {message && (
+                <div className={`flex items-center gap-2 p-4 rounded-lg mb-4 ${message.type === 'success'
+                        ? 'bg-green-500/10 text-green-400 border border-green-500/20'
+                        : 'bg-red-500/10 text-red-400 border border-red-500/20'
+                    }`}>
+                    {message.type === 'success' ? <CheckCircle size={18} /> : <XCircle size={18} />}
+                    {message.text}
+                </div>
+            )}
 
             <div className="space-y-4">
                 {articles.map((article) => (
@@ -128,17 +180,19 @@ export default function ArticlesClient({ initialData }: ArticlesClientProps) {
                                 <div className="flex justify-end gap-2">
                                     <button
                                         onClick={handleCancel}
-                                        className="flex items-center gap-2 px-4 py-2 text-slate-400 hover:text-slate-200 transition-colors"
+                                        disabled={saving}
+                                        className="flex items-center gap-2 px-4 py-2 text-slate-400 hover:text-slate-200 transition-colors disabled:opacity-50"
                                     >
                                         <X size={18} />
                                         Cancel
                                     </button>
                                     <button
                                         onClick={handleSave}
-                                        className="flex items-center gap-2 px-4 py-2 bg-teal-500 text-slate-900 font-medium rounded-lg hover:bg-teal-400 transition-colors"
+                                        disabled={saving}
+                                        className="flex items-center gap-2 px-4 py-2 bg-teal-500 text-slate-900 font-medium rounded-lg hover:bg-teal-400 transition-colors disabled:opacity-50"
                                     >
-                                        <Save size={18} />
-                                        Save
+                                        {saving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+                                        {saving ? 'Saving...' : 'Save'}
                                     </button>
                                 </div>
                             </div>
@@ -146,7 +200,7 @@ export default function ArticlesClient({ initialData }: ArticlesClientProps) {
                             <div className="flex items-start justify-between">
                                 <div className="flex-1">
                                     <div className="flex items-center gap-2">
-                                        <h3 className="text-lg font-semibold text-slate-100">{article.title}</h3>
+                                        <h3 className="text-lg font-semibold text-slate-100">{article.title || 'Untitled'}</h3>
                                         <a
                                             href={article.url}
                                             target="_blank"
@@ -156,19 +210,21 @@ export default function ArticlesClient({ initialData }: ArticlesClientProps) {
                                             <ExternalLink size={16} />
                                         </a>
                                     </div>
-                                    <p className="text-teal-400">{article.platform}</p>
+                                    <p className="text-teal-400">{article.platform || 'No platform'}</p>
                                     <p className="text-sm text-slate-400 mt-1">{formatDate(article.publishedDate)}</p>
                                 </div>
                                 <div className="flex gap-2 ml-4">
                                     <button
                                         onClick={() => handleEdit(article)}
-                                        className="p-2 text-slate-400 hover:text-teal-400 hover:bg-slate-800 rounded-lg transition-colors"
+                                        disabled={saving}
+                                        className="p-2 text-slate-400 hover:text-teal-400 hover:bg-slate-800 rounded-lg transition-colors disabled:opacity-50"
                                     >
                                         <Pencil size={18} />
                                     </button>
                                     <button
                                         onClick={() => handleDelete(article.id)}
-                                        className="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded-lg transition-colors"
+                                        disabled={saving}
+                                        className="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded-lg transition-colors disabled:opacity-50"
                                     >
                                         <Trash2 size={18} />
                                     </button>

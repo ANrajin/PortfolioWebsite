@@ -28,8 +28,8 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en" className="scroll-smooth">
-            <body className={`${roboto.variable} ${robotoMono.variable} antialiased`}>
+        <html lang="en" className="scroll-smooth" suppressHydrationWarning>
+            <body className={`${roboto.variable} ${robotoMono.variable} antialiased`} suppressHydrationWarning>
                 {children}
             </body>
         </html>

@@ -11,10 +11,30 @@ import {
     ContactSection,
     Footer,
 } from '@/components/presentational';
+import { getPortfolio } from '@/lib/api';
 import { dummyData } from '@/data/dummy';
 
-export default function Home() {
-    const { personalInfo, experiences, skills, projects, education, articles } = dummyData;
+export const dynamic = 'force-dynamic';
+export const revalidate = 60; // Revalidate every minute
+
+export default async function Home() {
+    let data;
+
+    try {
+        // Try to fetch from API
+        data = await getPortfolio();
+    } catch (error) {
+        // Fallback to dummy data if API is unavailable
+        console.warn('API unavailable, using dummy data:', error);
+        data = dummyData;
+    }
+
+    // Handle case where API returns null personalInfo
+    if (!data.personalInfo) {
+        data = dummyData;
+    }
+
+    const { personalInfo, experiences, skills, projects, education, articles } = data;
 
     return (
         <main className="relative min-h-screen bg-slate-900">

@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, Pencil, Trash2, X, Save, ExternalLink } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, Save, ExternalLink, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import type { Project } from '@portfolio/shared';
+import { createProject, updateProject, deleteProject } from '@/lib/api';
 
 interface ProjectsClientProps {
     initialData: Project[];
@@ -12,15 +13,18 @@ export default function ProjectsClient({ initialData }: ProjectsClientProps) {
     const [projects, setProjects] = useState(initialData);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [formData, setFormData] = useState<Partial<Project>>({});
+    const [saving, setSaving] = useState(false);
+    const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
     const handleEdit = (project: Project) => {
         setEditingId(project.id);
         setFormData(project);
+        setMessage(null);
     };
 
     const handleAdd = () => {
         const newProject: Project = {
-            id: Date.now().toString(),
+            id: 'new-' + Date.now().toString(),
             title: '',
             description: '',
             technologies: [],
@@ -29,26 +33,62 @@ export default function ProjectsClient({ initialData }: ProjectsClientProps) {
         setProjects([newProject, ...projects]);
         setEditingId(newProject.id);
         setFormData(newProject);
+        setMessage(null);
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (!editingId) return;
 
-        setProjects(projects.map(p =>
-            p.id === editingId ? { ...p, ...formData } as Project : p
-        ));
-        setEditingId(null);
-        setFormData({});
+        setSaving(true);
+        setMessage(null);
+
+        try {
+            const isNew = editingId.startsWith('new-');
+            let savedProject: Project;
+
+            if (isNew) {
+                const { id, ...data } = formData as Project;
+                savedProject = await createProject(data);
+            } else {
+                savedProject = await updateProject(editingId, formData);
+            }
+
+            setProjects(projects.map(p =>
+                p.id === editingId ? savedProject : p
+            ));
+            setEditingId(null);
+            setFormData({});
+            setMessage({ type: 'success', text: isNew ? 'Project created!' : 'Project updated!' });
+        } catch (error) {
+            console.error('Error saving:', error);
+            setMessage({ type: 'error', text: 'Failed to save. Please try again.' });
+        } finally {
+            setSaving(false);
+        }
     };
 
-    const handleDelete = (id: string) => {
-        if (confirm('Are you sure you want to delete this project?')) {
+    const handleDelete = async (id: string) => {
+        if (!confirm('Are you sure you want to delete this project?')) return;
+
+        setSaving(true);
+        setMessage(null);
+
+        try {
+            if (!id.startsWith('new-')) {
+                await deleteProject(id);
+            }
             setProjects(projects.filter(p => p.id !== id));
+            setMessage({ type: 'success', text: 'Project deleted!' });
+        } catch (error) {
+            console.error('Error deleting:', error);
+            setMessage({ type: 'error', text: 'Failed to delete. Please try again.' });
+        } finally {
+            setSaving(false);
         }
     };
 
     const handleCancel = () => {
-        if (formData.title === '') {
+        if (editingId?.startsWith('new-')) {
             setProjects(projects.filter(p => p.id !== editingId));
         }
         setEditingId(null);
@@ -64,12 +104,24 @@ export default function ProjectsClient({ initialData }: ProjectsClientProps) {
                 </div>
                 <button
                     onClick={handleAdd}
-                    className="flex items-center gap-2 px-4 py-2 bg-teal-500 text-slate-900 font-medium rounded-lg hover:bg-teal-400 transition-colors"
+                    disabled={saving}
+                    className="flex items-center gap-2 px-4 py-2 bg-teal-500 text-slate-900 font-medium rounded-lg hover:bg-teal-400 transition-colors disabled:opacity-50"
                 >
                     <Plus size={18} />
                     Add Project
                 </button>
             </div>
+
+            {/* Status Message */}
+            {message && (
+                <div className={`flex items-center gap-2 p-4 rounded-lg mb-4 ${message.type === 'success'
+                        ? 'bg-green-500/10 text-green-400 border border-green-500/20'
+                        : 'bg-red-500/10 text-red-400 border border-red-500/20'
+                    }`}>
+                    {message.type === 'success' ? <CheckCircle size={18} /> : <XCircle size={18} />}
+                    {message.text}
+                </div>
+            )}
 
             <div className="space-y-4">
                 {projects.map((project) => (
@@ -121,17 +173,19 @@ export default function ProjectsClient({ initialData }: ProjectsClientProps) {
                                 <div className="flex justify-end gap-2">
                                     <button
                                         onClick={handleCancel}
-                                        className="flex items-center gap-2 px-4 py-2 text-slate-400 hover:text-slate-200 transition-colors"
+                                        disabled={saving}
+                                        className="flex items-center gap-2 px-4 py-2 text-slate-400 hover:text-slate-200 transition-colors disabled:opacity-50"
                                     >
                                         <X size={18} />
                                         Cancel
                                     </button>
                                     <button
                                         onClick={handleSave}
-                                        className="flex items-center gap-2 px-4 py-2 bg-teal-500 text-slate-900 font-medium rounded-lg hover:bg-teal-400 transition-colors"
+                                        disabled={saving}
+                                        className="flex items-center gap-2 px-4 py-2 bg-teal-500 text-slate-900 font-medium rounded-lg hover:bg-teal-400 transition-colors disabled:opacity-50"
                                     >
-                                        <Save size={18} />
-                                        Save
+                                        {saving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+                                        {saving ? 'Saving...' : 'Save'}
                                     </button>
                                 </div>
                             </div>
@@ -139,7 +193,7 @@ export default function ProjectsClient({ initialData }: ProjectsClientProps) {
                             <div className="flex items-start justify-between">
                                 <div className="flex-1">
                                     <div className="flex items-center gap-2">
-                                        <h3 className="text-lg font-semibold text-slate-100">{project.title}</h3>
+                                        <h3 className="text-lg font-semibold text-slate-100">{project.title || 'Untitled'}</h3>
                                         {project.link && (
                                             <a
                                                 href={project.link}
@@ -152,7 +206,7 @@ export default function ProjectsClient({ initialData }: ProjectsClientProps) {
                                         )}
                                     </div>
                                     <p className="text-slate-400 mt-1">{project.description}</p>
-                                    {project.technologies.length > 0 && (
+                                    {project.technologies && project.technologies.length > 0 && (
                                         <div className="flex flex-wrap gap-2 mt-3">
                                             {project.technologies.map((tech, i) => (
                                                 <span key={i} className="px-2 py-1 text-xs bg-teal-500/10 text-teal-400 rounded border border-teal-500/20">
@@ -165,13 +219,15 @@ export default function ProjectsClient({ initialData }: ProjectsClientProps) {
                                 <div className="flex gap-2 ml-4">
                                     <button
                                         onClick={() => handleEdit(project)}
-                                        className="p-2 text-slate-400 hover:text-teal-400 hover:bg-slate-800 rounded-lg transition-colors"
+                                        disabled={saving}
+                                        className="p-2 text-slate-400 hover:text-teal-400 hover:bg-slate-800 rounded-lg transition-colors disabled:opacity-50"
                                     >
                                         <Pencil size={18} />
                                     </button>
                                     <button
                                         onClick={() => handleDelete(project.id)}
-                                        className="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded-lg transition-colors"
+                                        disabled={saving}
+                                        className="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded-lg transition-colors disabled:opacity-50"
                                     >
                                         <Trash2 size={18} />
                                     </button>

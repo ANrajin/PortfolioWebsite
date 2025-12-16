@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { Save, Plus, Trash2 } from 'lucide-react';
+import { Save, Plus, Trash2, CheckCircle, XCircle } from 'lucide-react';
 import type { PersonalInfo, SocialLink } from '@portfolio/shared';
+import { updatePersonalInfo } from '@/lib/api';
 
 interface InformationFormProps {
     initialData: PersonalInfo;
@@ -11,13 +12,20 @@ interface InformationFormProps {
 export default function InformationForm({ initialData }: InformationFormProps) {
     const [data, setData] = useState(initialData);
     const [saving, setSaving] = useState(false);
+    const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
     const handleSave = async () => {
         setSaving(true);
-        // TODO: Save to API in Phase 3
-        await new Promise(resolve => setTimeout(resolve, 500));
-        setSaving(false);
-        alert('Changes saved! (Note: API integration coming in Phase 3)');
+        setMessage(null);
+        try {
+            await updatePersonalInfo(data);
+            setMessage({ type: 'success', text: 'Changes saved successfully!' });
+        } catch (error) {
+            console.error('Error saving:', error);
+            setMessage({ type: 'error', text: 'Failed to save changes. Please try again.' });
+        } finally {
+            setSaving(false);
+        }
     };
 
     const handleAddSocialLink = () => {
@@ -48,6 +56,17 @@ export default function InformationForm({ initialData }: InformationFormProps) {
 
     return (
         <div className="space-y-6">
+            {/* Status Message */}
+            {message && (
+                <div className={`flex items-center gap-2 p-4 rounded-lg ${message.type === 'success'
+                        ? 'bg-green-500/10 text-green-400 border border-green-500/20'
+                        : 'bg-red-500/10 text-red-400 border border-red-500/20'
+                    }`}>
+                    {message.type === 'success' ? <CheckCircle size={18} /> : <XCircle size={18} />}
+                    {message.text}
+                </div>
+            )}
+
             {/* Basic Info */}
             <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
                 <h3 className="text-lg font-semibold text-slate-100 mb-4">Basic Information</h3>

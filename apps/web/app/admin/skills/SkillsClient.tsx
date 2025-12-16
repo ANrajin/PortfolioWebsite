@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, Trash2, Save } from 'lucide-react';
+import { Plus, Trash2, Save, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import type { Skill } from '@portfolio/shared';
 import { SKILL_CATEGORIES } from '@portfolio/shared';
+import { createSkill, deleteSkill } from '@/lib/api';
 
 interface SkillsClientProps {
     initialData: Skill[];
@@ -24,6 +25,8 @@ export default function SkillsClient({ initialData }: SkillsClientProps) {
     const [skills, setSkills] = useState(initialData);
     const [newSkillName, setNewSkillName] = useState('');
     const [newSkillCategory, setNewSkillCategory] = useState<CategoryKey>('frontend');
+    const [saving, setSaving] = useState(false);
+    const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
     // Group by category
     const groupedSkills = skills.reduce((acc, skill) => {
@@ -34,27 +37,44 @@ export default function SkillsClient({ initialData }: SkillsClientProps) {
         return acc;
     }, {} as Record<string, Skill[]>);
 
-    const handleAddSkill = () => {
+    const handleAddSkill = async () => {
         if (!newSkillName.trim()) return;
 
-        const newSkill: Skill = {
-            id: Date.now().toString(),
-            name: newSkillName.trim(),
-            category: newSkillCategory,
-            proficiency: 80,
-        };
+        setSaving(true);
+        setMessage(null);
 
-        setSkills([...skills, newSkill]);
-        setNewSkillName('');
+        try {
+            const newSkill = await createSkill({
+                name: newSkillName.trim(),
+                category: newSkillCategory,
+                proficiency: 80,
+            });
+
+            setSkills([...skills, newSkill]);
+            setNewSkillName('');
+            setMessage({ type: 'success', text: 'Skill added!' });
+        } catch (error) {
+            console.error('Error adding skill:', error);
+            setMessage({ type: 'error', text: 'Failed to add skill.' });
+        } finally {
+            setSaving(false);
+        }
     };
 
-    const handleDeleteSkill = (id: string) => {
-        setSkills(skills.filter(s => s.id !== id));
-    };
+    const handleDeleteSkill = async (id: string) => {
+        setSaving(true);
+        setMessage(null);
 
-    const handleSave = async () => {
-        // TODO: Save to API in Phase 3
-        alert('Changes saved! (Note: API integration coming in Phase 3)');
+        try {
+            await deleteSkill(id);
+            setSkills(skills.filter(s => s.id !== id));
+            setMessage({ type: 'success', text: 'Skill deleted!' });
+        } catch (error) {
+            console.error('Error deleting skill:', error);
+            setMessage({ type: 'error', text: 'Failed to delete skill.' });
+        } finally {
+            setSaving(false);
+        }
     };
 
     return (
@@ -64,14 +84,18 @@ export default function SkillsClient({ initialData }: SkillsClientProps) {
                     <h2 className="text-2xl font-bold text-slate-100">Skills</h2>
                     <p className="text-slate-400 mt-1">Manage your technical skills.</p>
                 </div>
-                <button
-                    onClick={handleSave}
-                    className="flex items-center gap-2 px-4 py-2 bg-teal-500 text-slate-900 font-medium rounded-lg hover:bg-teal-400 transition-colors"
-                >
-                    <Save size={18} />
-                    Save Changes
-                </button>
             </div>
+
+            {/* Status Message */}
+            {message && (
+                <div className={`flex items-center gap-2 p-4 rounded-lg mb-4 ${message.type === 'success'
+                        ? 'bg-green-500/10 text-green-400 border border-green-500/20'
+                        : 'bg-red-500/10 text-red-400 border border-red-500/20'
+                    }`}>
+                    {message.type === 'success' ? <CheckCircle size={18} /> : <XCircle size={18} />}
+                    {message.text}
+                </div>
+            )}
 
             {/* Add New Skill */}
             <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 mb-6">
@@ -83,12 +107,14 @@ export default function SkillsClient({ initialData }: SkillsClientProps) {
                         onChange={(e) => setNewSkillName(e.target.value)}
                         placeholder="Skill name (e.g., React)"
                         className="flex-1 px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500"
-                        onKeyDown={(e) => e.key === 'Enter' && handleAddSkill()}
+                        onKeyDown={(e) => e.key === 'Enter' && !saving && handleAddSkill()}
+                        disabled={saving}
                     />
                     <select
                         value={newSkillCategory}
                         onChange={(e) => setNewSkillCategory(e.target.value as CategoryKey)}
                         className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                        disabled={saving}
                     >
                         {Object.entries(SKILL_CATEGORIES).map(([key, label]) => (
                             <option key={key} value={key}>{label}</option>
@@ -96,9 +122,10 @@ export default function SkillsClient({ initialData }: SkillsClientProps) {
                     </select>
                     <button
                         onClick={handleAddSkill}
-                        className="flex items-center gap-2 px-4 py-2 bg-teal-500 text-slate-900 font-medium rounded-lg hover:bg-teal-400 transition-colors"
+                        disabled={saving || !newSkillName.trim()}
+                        className="flex items-center gap-2 px-4 py-2 bg-teal-500 text-slate-900 font-medium rounded-lg hover:bg-teal-400 transition-colors disabled:opacity-50"
                     >
-                        <Plus size={18} />
+                        {saving ? <Loader2 size={18} className="animate-spin" /> : <Plus size={18} />}
                         Add
                     </button>
                 </div>
@@ -122,7 +149,8 @@ export default function SkillsClient({ initialData }: SkillsClientProps) {
                                         <span className="text-sm font-medium">{skill.name}</span>
                                         <button
                                             onClick={() => handleDeleteSkill(skill.id)}
-                                            className="opacity-0 group-hover:opacity-100 p-0.5 hover:bg-red-500/20 rounded-full transition-all"
+                                            disabled={saving}
+                                            className="opacity-0 group-hover:opacity-100 p-0.5 hover:bg-red-500/20 rounded-full transition-all disabled:opacity-50"
                                         >
                                             <Trash2 size={14} className="text-red-400" />
                                         </button>
