@@ -1,0 +1,9 @@
+# NextAuth.js
+AUTH_SECRET=""
+
+# Google OAuth (get from console.cloud.google.com)
+GOOGLE_CLIENT_ID=""
+GOOGLE_CLIENT_SECRET=""
+
+# Admin whitelist (comma-separated emails)
+ADMIN_EMAILS=""

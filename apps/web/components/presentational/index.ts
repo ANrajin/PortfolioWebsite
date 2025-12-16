@@ -1,0 +1,13 @@
+// Presentational Components - Pure UI components
+export { default as MatrixRain } from './MatrixRain';
+export { default as Navbar } from './Navbar';
+export { default as HeroSection } from './HeroSection';
+export { default as SocialLinks } from './SocialLinks';
+export { default as AboutSection } from './AboutSection';
+export { default as ExperienceSection } from './ExperienceSection';
+export { default as SkillsSection } from './SkillsSection';
+export { default as ProjectsSection } from './ProjectsSection';
+export { default as EducationSection } from './EducationSection';
+export { default as ArticlesSection } from './ArticlesSection';
+export { default as ContactSection } from './ContactSection';
+export { default as Footer } from './Footer';
