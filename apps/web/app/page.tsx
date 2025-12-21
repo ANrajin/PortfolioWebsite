@@ -60,7 +60,7 @@ export default async function Home() {
                 <ProjectsSection projects={projects} />
                 <EducationSection education={education} />
                 <ArticlesSection articles={articles} />
-                <ContactSection email={personalInfo.email} phone={personalInfo.phone} />
+                <ContactSection email={personalInfo.email} phone={personalInfo.phone} socialLinks={personalInfo.socialLinks} />
                 <Footer />
             </div>
         </main>
