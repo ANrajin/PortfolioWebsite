@@ -3,10 +3,19 @@ import { prisma } from "../lib/prisma.js";
 
 export const portfolioRouter = Router();
 
+// Helper to parse JSON fields
+function parseJsonArray(value: unknown): string[] {
+    if (Array.isArray(value)) return value;
+    if (typeof value === 'string') {
+        try { return JSON.parse(value); } catch { return []; }
+    }
+    return [];
+}
+
 // GET all portfolio data
 portfolioRouter.get("/", async (req, res) => {
     try {
-        const [personalInfo, experiences, skills, projects, education, articles] = await Promise.all([
+        const [personalInfo, experiences, skills, projects, education, articles, certifications] = await Promise.all([
             prisma.personalInfo.findFirst({
                 include: { socialLinks: true },
             }),
@@ -24,6 +33,9 @@ portfolioRouter.get("/", async (req, res) => {
             }),
             prisma.article.findMany({
                 orderBy: { publishedDate: "desc" },
+            }),
+            prisma.certification.findMany({
+                orderBy: { issueDate: "desc" },
             }),
         ]);
 
@@ -44,42 +56,30 @@ portfolioRouter.get("/", async (req, res) => {
                     label: link.label,
                 })),
             } : null,
-            experiences: experiences.map(exp => {
-                let techs = exp.technologies;
-                if (typeof techs === 'string') {
-                    try { techs = JSON.parse(techs); } catch { techs = []; }
-                }
-                return {
-                    id: exp.id,
-                    company: exp.company,
-                    position: exp.position,
-                    startDate: exp.startDate.toISOString().split("T")[0],
-                    endDate: exp.endDate?.toISOString().split("T")[0] || null,
-                    current: exp.current,
-                    description: exp.description,
-                    technologies: Array.isArray(techs) ? techs : [],
-                };
-            }),
+            experiences: experiences.map(exp => ({
+                id: exp.id,
+                company: exp.company,
+                position: exp.position,
+                startDate: exp.startDate.toISOString().split("T")[0],
+                endDate: exp.endDate?.toISOString().split("T")[0] || null,
+                current: exp.current,
+                description: exp.description,
+                technologies: parseJsonArray(exp.technologies),
+            })),
             skills: skills.map(skill => ({
                 id: skill.id,
                 name: skill.name,
                 category: skill.category,
                 proficiency: skill.proficiency,
             })),
-            projects: projects.map(project => {
-                let techs = project.technologies;
-                if (typeof techs === 'string') {
-                    try { techs = JSON.parse(techs); } catch { techs = []; }
-                }
-                return {
-                    id: project.id,
-                    title: project.title,
-                    description: project.description,
-                    link: project.link || undefined,
-                    technologies: Array.isArray(techs) ? techs : [],
-                    imageUrl: project.imageUrl || undefined,
-                };
-            }),
+            projects: projects.map(project => ({
+                id: project.id,
+                title: project.title,
+                description: project.description,
+                link: project.link || undefined,
+                technologies: parseJsonArray(project.technologies),
+                imageUrl: project.imageUrl || undefined,
+            })),
             education: education.map(edu => ({
                 id: edu.id,
                 institution: edu.institution,
@@ -98,6 +98,18 @@ portfolioRouter.get("/", async (req, res) => {
                 publishedDate: article.publishedDate.toISOString().split("T")[0],
                 thumbnail: article.thumbnail || undefined,
             })),
+            certifications: certifications.map(cert => ({
+                id: cert.id,
+                name: cert.name,
+                organization: cert.organization,
+                issueDate: cert.issueDate.toISOString().split("T")[0],
+                expirationDate: cert.expirationDate?.toISOString().split("T")[0] || null,
+                credentialId: cert.credentialId || undefined,
+                credentialUrl: cert.credentialUrl || undefined,
+                skills: parseJsonArray(cert.skills),
+                mediaUrl: cert.mediaUrl || undefined,
+                mediaType: cert.mediaType || undefined,
+            })),
         };
 
         res.json(data);
@@ -106,3 +118,4 @@ portfolioRouter.get("/", async (req, res) => {
         res.status(500).json({ error: "Failed to fetch portfolio data" });
     }
 });
+

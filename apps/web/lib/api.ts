@@ -153,3 +153,46 @@ export async function updateArticle(id: string, data: Partial<Article>): Promise
 export async function deleteArticle(id: string): Promise<void> {
     return fetchAPI<void>(`/api/articles/${id}`, { method: "DELETE" });
 }
+
+// Certifications
+import type { Certification } from "@portfolio/shared";
+
+export async function getCertifications(): Promise<Certification[]> {
+    return fetchAPI<Certification[]>("/api/certifications");
+}
+
+export async function createCertification(data: Omit<Certification, "id">): Promise<Certification> {
+    return fetchAPI<Certification>("/api/certifications", {
+        method: "POST",
+        body: JSON.stringify(data),
+    });
+}
+
+export async function updateCertification(id: string, data: Partial<Certification>): Promise<Certification> {
+    return fetchAPI<Certification>(`/api/certifications/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+    });
+}
+
+export async function deleteCertification(id: string): Promise<void> {
+    return fetchAPI<void>(`/api/certifications/${id}`, { method: "DELETE" });
+}
+
+// File Upload
+export async function uploadCertificateMedia(file: File): Promise<{ mediaUrl: string; mediaType: string; filename: string }> {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await fetch(`${API_URL}/api/upload/certificate`, {
+        method: "POST",
+        body: formData,
+    });
+
+    if (!res.ok) {
+        throw new Error(`Upload Error: ${res.status}`);
+    }
+
+    return res.json();
+}
+

@@ -38,6 +38,7 @@ export const NAVIGATION_ITEMS = [
     { id: 'skills', label: 'Skills' },
     { id: 'projects', label: 'Projects' },
     { id: 'education', label: 'Education' },
+    { id: 'certifications', label: 'Certifications' },
     { id: 'articles', label: 'Articles' },
     { id: 'contact', label: 'Contact' },
 ] as const;

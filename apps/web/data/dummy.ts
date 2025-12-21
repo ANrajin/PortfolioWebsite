@@ -191,4 +191,27 @@ export const dummyData: PortfolioData = {
             thumbnail: '',
         },
     ],
+    certifications: [
+        {
+            id: '1',
+            name: 'AWS Solutions Architect - Associate',
+            organization: 'Amazon Web Services',
+            issueDate: '2023-06-15',
+            expirationDate: '2026-06-15',
+            credentialId: 'AWSSA-12345',
+            credentialUrl: 'https://aws.amazon.com/verify',
+            skills: ['AWS', 'Cloud Architecture', 'EC2', 'S3', 'VPC'],
+        },
+        {
+            id: '2',
+            name: 'Google Cloud Professional Developer',
+            organization: 'Google Cloud',
+            issueDate: '2023-03-20',
+            expirationDate: null,
+            credentialId: 'GCP-DEV-67890',
+            credentialUrl: 'https://cloud.google.com/verify',
+            skills: ['GCP', 'Kubernetes', 'Cloud Functions'],
+        },
+    ],
 };
+

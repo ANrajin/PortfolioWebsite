@@ -7,6 +7,7 @@ import {
     SkillsSection,
     ProjectsSection,
     EducationSection,
+    CertificationsSection,
     ArticlesSection,
     ContactSection,
     Footer,
@@ -34,7 +35,7 @@ export default async function Home() {
         data = dummyData;
     }
 
-    const { personalInfo, experiences, skills, projects, education, articles } = data;
+    const { personalInfo, experiences, skills, projects, education, articles, certifications } = data;
 
     return (
         <main className="relative min-h-screen bg-slate-900">
@@ -59,6 +60,7 @@ export default async function Home() {
                 <SkillsSection skills={skills} />
                 <ProjectsSection projects={projects} />
                 <EducationSection education={education} />
+                <CertificationsSection certifications={certifications || []} />
                 <ArticlesSection articles={articles} />
                 <ContactSection email={personalInfo.email} phone={personalInfo.phone} socialLinks={personalInfo.socialLinks} />
                 <Footer />
