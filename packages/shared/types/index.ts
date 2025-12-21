@@ -65,6 +65,19 @@ export interface Article {
     thumbnail?: string;
 }
 
+export interface Certification {
+    id: string;
+    name: string;
+    organization: string;
+    issueDate: string;
+    expirationDate?: string | null;
+    credentialId?: string;
+    credentialUrl?: string;
+    skills: string[];
+    mediaUrl?: string;
+    mediaType?: 'pdf' | 'image';
+}
+
 export interface PortfolioData {
     personalInfo: PersonalInfo;
     experiences: Experience[];
@@ -72,4 +85,6 @@ export interface PortfolioData {
     projects: Project[];
     education: Education[];
     articles: Article[];
+    certifications: Certification[];
 }
+

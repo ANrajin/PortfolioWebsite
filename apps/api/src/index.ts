@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import path from "path";
 import { portfolioRouter } from "./routes/portfolio.js";
 import { personalInfoRouter } from "./routes/personal-info.js";
 import { experiencesRouter } from "./routes/experiences.js";
@@ -7,6 +8,8 @@ import { skillsRouter } from "./routes/skills.js";
 import { projectsRouter } from "./routes/projects.js";
 import { educationRouter } from "./routes/education.js";
 import { articlesRouter } from "./routes/articles.js";
+import { certificationsRouter } from "./routes/certifications.js";
+import { uploadRouter } from "./routes/upload.js";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -26,6 +29,11 @@ app.use("/api/skills", skillsRouter);
 app.use("/api/projects", projectsRouter);
 app.use("/api/education", educationRouter);
 app.use("/api/articles", articlesRouter);
+app.use("/api/certifications", certificationsRouter);
+app.use("/api/upload", uploadRouter);
+
+// Serve uploaded files
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 // Health check
 app.get("/api/health", (req, res) => {

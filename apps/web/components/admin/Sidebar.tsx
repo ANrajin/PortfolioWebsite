@@ -8,6 +8,7 @@ import {
     Code2,
     FolderGit2,
     GraduationCap,
+    Award,
     FileText,
     LayoutDashboard
 } from 'lucide-react';
@@ -19,6 +20,7 @@ const navItems = [
     { href: '/admin/skills', label: 'Skills', icon: Code2 },
     { href: '/admin/projects', label: 'Projects', icon: FolderGit2 },
     { href: '/admin/education', label: 'Education', icon: GraduationCap },
+    { href: '/admin/certifications', label: 'Certifications', icon: Award },
     { href: '/admin/articles', label: 'Articles', icon: FileText },
 ];
 
@@ -49,8 +51,8 @@ export default function AdminSidebar() {
                             key={item.href}
                             href={item.href}
                             className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive
-                                    ? 'bg-teal-500/10 text-teal-400 border border-teal-500/20'
-                                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                                ? 'bg-teal-500/10 text-teal-400 border border-teal-500/20'
+                                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
                                 }`}
                         >
                             <Icon size={18} />
