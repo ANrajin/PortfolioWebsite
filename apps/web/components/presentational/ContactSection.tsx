@@ -4,12 +4,15 @@ import { useState } from 'react';
 import { Mail, Phone, Send, MapPin } from 'lucide-react';
 import SocialLinks from './SocialLinks';
 
+import type { SocialLink } from '@portfolio/shared';
+
 interface ContactSectionProps {
     email: string;
     phone: string;
+    socialLinks?: SocialLink[];
 }
 
-const ContactSection: React.FC<ContactSectionProps> = ({ email, phone }) => {
+const ContactSection: React.FC<ContactSectionProps> = ({ email, phone, socialLinks }) => {
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -92,7 +95,7 @@ const ContactSection: React.FC<ContactSectionProps> = ({ email, phone }) => {
 
                         <div className="pt-4">
                             <p className="text-slate-400 mb-4">Connect with me:</p>
-                            <SocialLinks size="lg" />
+                            <SocialLinks links={socialLinks} size="lg" />
                         </div>
                     </div>
 

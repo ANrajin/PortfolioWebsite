@@ -1,5 +1,7 @@
 # NextAuth.js
 AUTH_SECRET=""
+AUTH_TRUST_HOST=""
+AUTH_URL=""
 
 # Google OAuth (get from console.cloud.google.com)
 GOOGLE_CLIENT_ID=""
