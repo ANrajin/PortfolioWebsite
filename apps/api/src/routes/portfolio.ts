@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { prisma } from "../lib/prisma.js";
+import type { SocialLink, Experience, Skill, Project, Education, Article, Certification } from "@prisma/client";
 
 export const portfolioRouter = Router();
 
@@ -49,14 +50,14 @@ portfolioRouter.get("/", async (req, res) => {
                 phone: personalInfo.phone,
                 imageUrl: personalInfo.imageUrl || "",
                 careerObjective: personalInfo.careerObjective,
-                socialLinks: personalInfo.socialLinks.map(link => ({
+                socialLinks: personalInfo.socialLinks.map((link: SocialLink) => ({
                     id: link.id,
                     platform: link.platform,
                     url: link.url,
                     label: link.label,
                 })),
             } : null,
-            experiences: experiences.map(exp => ({
+            experiences: experiences.map((exp: Experience) => ({
                 id: exp.id,
                 company: exp.company,
                 position: exp.position,
@@ -66,13 +67,13 @@ portfolioRouter.get("/", async (req, res) => {
                 description: exp.description,
                 technologies: parseJsonArray(exp.technologies),
             })),
-            skills: skills.map(skill => ({
+            skills: skills.map((skill: Skill) => ({
                 id: skill.id,
                 name: skill.name,
                 category: skill.category,
                 proficiency: skill.proficiency,
             })),
-            projects: projects.map(project => ({
+            projects: projects.map((project: Project) => ({
                 id: project.id,
                 title: project.title,
                 description: project.description,
@@ -80,7 +81,7 @@ portfolioRouter.get("/", async (req, res) => {
                 technologies: parseJsonArray(project.technologies),
                 imageUrl: project.imageUrl || undefined,
             })),
-            education: education.map(edu => ({
+            education: education.map((edu: Education) => ({
                 id: edu.id,
                 institution: edu.institution,
                 degree: edu.degree,
@@ -90,7 +91,7 @@ portfolioRouter.get("/", async (req, res) => {
                 current: edu.current,
                 description: edu.description || undefined,
             })),
-            articles: articles.map(article => ({
+            articles: articles.map((article: Article) => ({
                 id: article.id,
                 title: article.title,
                 platform: article.platform,
@@ -98,7 +99,7 @@ portfolioRouter.get("/", async (req, res) => {
                 publishedDate: article.publishedDate.toISOString().split("T")[0],
                 thumbnail: article.thumbnail || undefined,
             })),
-            certifications: certifications.map(cert => ({
+            certifications: certifications.map((cert: Certification) => ({
                 id: cert.id,
                 name: cert.name,
                 organization: cert.organization,

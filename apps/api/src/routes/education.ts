@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { prisma } from "../lib/prisma.js";
+import type { Education } from "@prisma/client";
 
 export const educationRouter = Router();
 
@@ -9,7 +10,7 @@ educationRouter.get("/", async (req, res) => {
         const education = await prisma.education.findMany({
             orderBy: [{ current: "desc" }, { startYear: "desc" }],
         });
-        res.json(education.map(edu => ({
+        res.json(education.map((edu: Education) => ({
             id: edu.id,
             institution: edu.institution,
             degree: edu.degree,

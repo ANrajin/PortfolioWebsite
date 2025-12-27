@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { prisma } from "../lib/prisma.js";
+import type { Project } from "@prisma/client";
 
 export const projectsRouter = Router();
 
@@ -18,7 +19,7 @@ projectsRouter.get("/", async (req, res) => {
         const projects = await prisma.project.findMany({
             orderBy: { sortOrder: "asc" },
         });
-        res.json(projects.map(project => ({
+        res.json(projects.map((project: Project) => ({
             id: project.id,
             title: project.title,
             description: project.description,

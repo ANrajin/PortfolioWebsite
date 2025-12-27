@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { prisma } from "../lib/prisma.js";
+import type { Certification } from "@prisma/client";
 
 export const certificationsRouter = Router();
 
@@ -18,7 +19,7 @@ certificationsRouter.get("/", async (req, res) => {
         const certifications = await prisma.certification.findMany({
             orderBy: { issueDate: "desc" },
         });
-        res.json(certifications.map(cert => ({
+        res.json(certifications.map((cert: Certification) => ({
             id: cert.id,
             name: cert.name,
             organization: cert.organization,

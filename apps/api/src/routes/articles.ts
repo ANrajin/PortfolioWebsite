@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { prisma } from "../lib/prisma.js";
+import type { Article } from "@prisma/client";
 
 export const articlesRouter = Router();
 
@@ -9,7 +10,7 @@ articlesRouter.get("/", async (req, res) => {
         const articles = await prisma.article.findMany({
             orderBy: { publishedDate: "desc" },
         });
-        res.json(articles.map(article => ({
+        res.json(articles.map((article: Article) => ({
             id: article.id,
             title: article.title,
             platform: article.platform,

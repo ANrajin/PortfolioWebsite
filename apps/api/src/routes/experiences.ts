@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { prisma } from "../lib/prisma.js";
+import type { Experience } from "@prisma/client";
 
 export const experiencesRouter = Router();
 
@@ -18,7 +19,7 @@ experiencesRouter.get("/", async (req, res) => {
         const experiences = await prisma.experience.findMany({
             orderBy: [{ current: "desc" }, { startDate: "desc" }],
         });
-        res.json(experiences.map(exp => ({
+        res.json(experiences.map((exp: Experience) => ({
             id: exp.id,
             company: exp.company,
             position: exp.position,

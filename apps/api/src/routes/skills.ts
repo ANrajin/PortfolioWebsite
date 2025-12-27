@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { prisma } from "../lib/prisma.js";
+import type { Skill } from "@prisma/client";
 
 export const skillsRouter = Router();
 
@@ -9,7 +10,7 @@ skillsRouter.get("/", async (req, res) => {
         const skills = await prisma.skill.findMany({
             orderBy: { sortOrder: "asc" },
         });
-        res.json(skills.map(skill => ({
+        res.json(skills.map((skill: Skill) => ({
             id: skill.id,
             name: skill.name,
             category: skill.category,
