@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Download } from 'lucide-react';
 import { NAVIGATION_ITEMS } from '@portfolio/shared';
 
 const Navbar: React.FC = () => {
@@ -75,6 +75,15 @@ const Navbar: React.FC = () => {
                                     {item.label}
                                 </button>
                             ))}
+                            {/* Download Resume Button */}
+                            <a
+                                href="/api/resume"
+                                download
+                                className="flex items-center gap-2 px-4 py-2 bg-teal-500 hover:bg-teal-400 text-slate-900 font-semibold rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-teal-500/25"
+                            >
+                                <Download size={16} />
+                                Resume
+                            </a>
                         </div>
 
                         {/* Mobile Menu Button */}
@@ -111,6 +120,16 @@ const Navbar: React.FC = () => {
                                 {item.label}
                             </button>
                         ))}
+                        {/* Download Resume Button - Mobile */}
+                        <a
+                            href="/api/resume"
+                            download
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className="flex items-center gap-2 px-6 py-3 bg-teal-500 hover:bg-teal-400 text-slate-900 font-semibold rounded-lg transition-all duration-300 mt-4"
+                        >
+                            <Download size={20} />
+                            Download Resume
+                        </a>
                     </div>
                 </div>
             )}
