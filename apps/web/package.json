@@ -10,6 +10,7 @@
     },
     "dependencies": {
         "@portfolio/shared": "*",
+        "jspdf": "^3.0.4",
         "lucide-react": "^0.460.0",
         "next": "^15.0.0",
         "next-auth": "^5.0.0-beta.30",
