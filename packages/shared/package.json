@@ -3,6 +3,27 @@
     "version": "1.0.0",
     "private": true,
     "main": "./index.ts",
+    "module": "./index.ts",
     "types": "./index.ts",
+    "exports": {
+        ".": {
+            "types": "./index.ts",
+            "import": "./index.ts",
+            "require": "./index.ts",
+            "default": "./index.ts"
+        },
+        "./types": {
+            "types": "./types/index.ts",
+            "import": "./types/index.ts",
+            "require": "./types/index.ts",
+            "default": "./types/index.ts"
+        },
+        "./constants": {
+            "types": "./constants/index.ts",
+            "import": "./constants/index.ts",
+            "require": "./constants/index.ts",
+            "default": "./constants/index.ts"
+        }
+    },
     "scripts": {}
 }
