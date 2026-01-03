@@ -56,12 +56,12 @@ export default async function Home() {
             {/* Content Sections */}
             <div className="relative z-10">
                 <AboutSection info={personalInfo} />
-                <ExperienceSection experiences={experiences} />
-                <SkillsSection skills={skills} />
-                <ProjectsSection projects={projects} />
-                <EducationSection education={education} />
-                <CertificationsSection certifications={certifications || []} />
-                <ArticlesSection articles={articles} />
+                {experiences && experiences.length > 0 && <ExperienceSection experiences={experiences} />}
+                {skills && skills.length > 0 && <SkillsSection skills={skills} />}
+                {projects && projects.length > 0 && <ProjectsSection projects={projects} />}
+                {education && education.length > 0 && <EducationSection education={education} />}
+                {certifications && certifications.length > 0 && <CertificationsSection certifications={certifications} />}
+                {articles && articles.length > 0 && <ArticlesSection articles={articles} />}
                 <ContactSection email={personalInfo.email} phone={personalInfo.phone} socialLinks={personalInfo.socialLinks} />
                 <Footer />
             </div>
