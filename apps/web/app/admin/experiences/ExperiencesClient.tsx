@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Plus, Pencil, Trash2, X, Save, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import type { Experience } from '@portfolio/shared';
 import { createExperience, updateExperience, deleteExperience } from '@/lib/api';
+import MarkdownEditor from '@/components/admin/MarkdownEditor';
 
 interface ExperiencesClientProps {
     initialData: Experience[];
@@ -200,12 +201,12 @@ export default function ExperiencesClient({ initialData }: ExperiencesClientProp
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-400 mb-1">Description</label>
-                                    <textarea
+                                    <label className="block text-sm font-medium text-slate-400 mb-1">Description (Markdown supported)</label>
+                                    <MarkdownEditor
                                         value={formData.description || ''}
-                                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                        rows={4}
-                                        className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none"
+                                        onChange={(value) => setFormData({ ...formData, description: value })}
+                                        height={200}
+                                        placeholder="Describe your responsibilities and achievements..."
                                     />
                                 </div>
 

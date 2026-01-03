@@ -2,6 +2,8 @@
 
 import { Calendar, MapPin } from 'lucide-react';
 import type { Experience } from '@portfolio/shared';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface ExperienceSectionProps {
     experiences: Experience[];
@@ -43,9 +45,11 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({ experiences }) =>
                                 </div>
 
                                 {/* Description */}
-                                <p className="text-slate-300 mb-4 leading-relaxed">
-                                    {exp.description}
-                                </p>
+                                <div className="text-slate-300 mb-4 leading-relaxed prose prose-invert prose-sm max-w-none prose-p:my-2 prose-ul:my-2 prose-li:my-0.5">
+                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                        {exp.description || ''}
+                                    </ReactMarkdown>
+                                </div>
 
                                 {/* Technologies */}
                                 <div className="flex flex-wrap gap-2">
