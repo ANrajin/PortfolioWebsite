@@ -46,6 +46,7 @@ const config: Config = {
                 'slide-up': 'slideUp 0.6s ease-out',
                 'slide-down': 'slideDown 0.3s ease-out',
                 'typing': 'typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite',
+                'shimmer': 'shimmer 2s infinite',
             },
             keyframes: {
                 fadeIn: {
@@ -67,6 +68,9 @@ const config: Config = {
                 'blink-caret': {
                     'from, to': { borderColor: 'transparent' },
                     '50%': { borderColor: '#14b8a6' },
+                },
+                shimmer: {
+                    '100%': { transform: 'translateX(100%)' },
                 },
             },
         },
