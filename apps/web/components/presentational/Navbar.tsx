@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Menu, X, Download } from 'lucide-react';
+import { Menu, X, Download, Loader2 } from 'lucide-react';
 import { NAVIGATION_ITEMS } from '@portfolio/shared';
 
 const Navbar: React.FC = () => {
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [activeSection, setActiveSection] = useState('');
+    const [isDownloading, setIsDownloading] = useState(false);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -36,6 +37,32 @@ const Navbar: React.FC = () => {
         const element = document.getElementById(id);
         if (element) {
             element.scrollIntoView({ behavior: 'smooth' });
+        }
+    };
+
+    const handleResumeDownload = async () => {
+        if (isDownloading) return;
+
+        setIsDownloading(true);
+        setIsMobileMenuOpen(false);
+
+        try {
+            const response = await fetch('/api/resume');
+            if (!response.ok) throw new Error('Download failed');
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'resume.pdf';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Failed to download resume:', error);
+        } finally {
+            setIsDownloading(false);
         }
     };
 
@@ -76,14 +103,18 @@ const Navbar: React.FC = () => {
                                 </button>
                             ))}
                             {/* Download Resume Button */}
-                            <a
-                                href="/api/resume"
-                                download
-                                className="flex items-center gap-2 px-4 py-2 bg-teal-500 hover:bg-teal-400 text-slate-900 font-semibold rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-teal-500/25"
+                            <button
+                                onClick={handleResumeDownload}
+                                disabled={isDownloading}
+                                className="flex items-center gap-2 px-4 py-2 bg-teal-500 hover:bg-teal-400 text-slate-900 font-semibold rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-teal-500/25 disabled:opacity-70 disabled:cursor-not-allowed"
                             >
-                                <Download size={16} />
+                                {isDownloading ? (
+                                    <Loader2 size={16} className="animate-spin" />
+                                ) : (
+                                    <Download size={16} />
+                                )}
                                 Resume
-                            </a>
+                            </button>
                         </div>
 
                         {/* Mobile Menu Button */}
@@ -121,15 +152,18 @@ const Navbar: React.FC = () => {
                             </button>
                         ))}
                         {/* Download Resume Button - Mobile */}
-                        <a
-                            href="/api/resume"
-                            download
-                            onClick={() => setIsMobileMenuOpen(false)}
-                            className="flex items-center gap-2 px-6 py-3 bg-teal-500 hover:bg-teal-400 text-slate-900 font-semibold rounded-lg transition-all duration-300 mt-4"
+                        <button
+                            onClick={handleResumeDownload}
+                            disabled={isDownloading}
+                            className="flex items-center gap-2 px-6 py-3 bg-teal-500 hover:bg-teal-400 text-slate-900 font-semibold rounded-lg transition-all duration-300 mt-4 disabled:opacity-70 disabled:cursor-not-allowed"
                         >
-                            <Download size={20} />
+                            {isDownloading ? (
+                                <Loader2 size={20} className="animate-spin" />
+                            ) : (
+                                <Download size={20} />
+                            )}
                             Download Resume
-                        </a>
+                        </button>
                     </div>
                 </div>
             )}
