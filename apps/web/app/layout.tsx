@@ -20,7 +20,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-    title: 'Software Engineer Portfolio',
+    title: 'A N Rajin | Software Engineer Portfolio',
     description: 'Professional portfolio showcasing my work as a Software Engineer',
     keywords: ['Software Engineer', 'Portfolio', 'Developer', 'Full Stack'],
     authors: [{ name: 'Software Engineer' }],

@@ -1,9 +1,8 @@
 'use client';
 
-import { useState } from 'react';
 import { Plus, Pencil, Trash2, X, Save, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import type { Experience } from '@portfolio/shared';
-import { createExperience, updateExperience, deleteExperience } from '@/lib/api';
+import { useExperienceForm } from '@/features/experiences';
 import MarkdownEditor from '@/components/admin/MarkdownEditor';
 
 interface ExperiencesClientProps {
@@ -11,106 +10,21 @@ interface ExperiencesClientProps {
 }
 
 export default function ExperiencesClient({ initialData }: ExperiencesClientProps) {
-    const [experiences, setExperiences] = useState(initialData);
-    const [editingId, setEditingId] = useState<string | null>(null);
-    const [formData, setFormData] = useState<Partial<Experience>>({});
-    const [techInput, setTechInput] = useState('');
-    const [saving, setSaving] = useState(false);
-    const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-
-    const handleEdit = (exp: Experience) => {
-        setEditingId(exp.id);
-        setFormData(exp);
-        setTechInput(exp.technologies?.join(', ') || '');
-        setMessage(null);
-    };
-
-    const handleAdd = () => {
-        const newExp: Experience = {
-            id: 'new-' + Date.now().toString(),
-            company: '',
-            position: '',
-            startDate: new Date().toISOString().split('T')[0],
-            endDate: null,
-            current: true,
-            description: '',
-            technologies: [],
-        };
-        setExperiences([newExp, ...experiences]);
-        setEditingId(newExp.id);
-        setFormData(newExp);
-        setTechInput('');
-        setMessage(null);
-    };
-
-    const handleSave = async () => {
-        if (!editingId) return;
-
-        setSaving(true);
-        setMessage(null);
-
-        try {
-            const isNew = editingId.startsWith('new-');
-            let savedExp: Experience;
-
-            if (isNew) {
-                // Create new experience
-                const { id, ...data } = formData as Experience;
-                savedExp = await createExperience({
-                    ...data,
-                    technologies: techInput.split(',').map(t => t.trim()).filter(Boolean)
-                });
-            } else {
-                // Update existing
-                savedExp = await updateExperience(editingId, {
-                    ...formData,
-                    technologies: techInput.split(',').map(t => t.trim()).filter(Boolean)
-                });
-            }
-
-            setExperiences(experiences.map(exp =>
-                exp.id === editingId ? savedExp : exp
-            ));
-            setEditingId(null);
-            setFormData({});
-            setTechInput('');
-            setMessage({ type: 'success', text: isNew ? 'Experience created!' : 'Experience updated!' });
-        } catch (error) {
-            console.error('Error saving:', error);
-            setMessage({ type: 'error', text: 'Failed to save. Please try again.' });
-        } finally {
-            setSaving(false);
-        }
-    };
-
-    const handleDelete = async (id: string) => {
-        if (!confirm('Are you sure you want to delete this experience?')) return;
-
-        setSaving(true);
-        setMessage(null);
-
-        try {
-            if (!id.startsWith('new-')) {
-                await deleteExperience(id);
-            }
-            setExperiences(experiences.filter(exp => exp.id !== id));
-            setMessage({ type: 'success', text: 'Experience deleted!' });
-        } catch (error) {
-            console.error('Error deleting:', error);
-            setMessage({ type: 'error', text: 'Failed to delete. Please try again.' });
-        } finally {
-            setSaving(false);
-        }
-    };
-
-    const handleCancel = () => {
-        if (editingId?.startsWith('new-')) {
-            setExperiences(experiences.filter(exp => exp.id !== editingId));
-        }
-        setEditingId(null);
-        setFormData({});
-        setTechInput('');
-    };
+    const {
+        experiences,
+        editingId,
+        formData,
+        saving,
+        message,
+        techInput,
+        setTechInput,
+        handleAdd,
+        handleEdit,
+        handleSave,
+        handleDelete,
+        handleCancel,
+        updateField,
+    } = useExperienceForm(initialData);
 
     return (
         <div className="max-w-4xl mx-auto">
@@ -129,7 +43,6 @@ export default function ExperiencesClient({ initialData }: ExperiencesClientProp
                 </button>
             </div>
 
-            {/* Status Message */}
             {message && (
                 <div className={`flex items-center gap-2 p-4 rounded-lg mb-4 ${message.type === 'success'
                     ? 'bg-green-500/10 text-green-400 border border-green-500/20'
@@ -144,7 +57,6 @@ export default function ExperiencesClient({ initialData }: ExperiencesClientProp
                 {experiences.map((exp) => (
                     <div key={exp.id} className="bg-slate-900 border border-slate-800 rounded-xl p-6">
                         {editingId === exp.id ? (
-                            /* Edit Form */
                             <div className="space-y-4">
                                 <div className="grid md:grid-cols-2 gap-4">
                                     <div>
@@ -152,7 +64,7 @@ export default function ExperiencesClient({ initialData }: ExperiencesClientProp
                                         <input
                                             type="text"
                                             value={formData.company || ''}
-                                            onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+                                            onChange={(e) => updateField('company', e.target.value)}
                                             className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500"
                                         />
                                     </div>
@@ -161,7 +73,7 @@ export default function ExperiencesClient({ initialData }: ExperiencesClientProp
                                         <input
                                             type="text"
                                             value={formData.position || ''}
-                                            onChange={(e) => setFormData({ ...formData, position: e.target.value })}
+                                            onChange={(e) => updateField('position', e.target.value)}
                                             className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500"
                                         />
                                     </div>
@@ -173,7 +85,7 @@ export default function ExperiencesClient({ initialData }: ExperiencesClientProp
                                         <input
                                             type="date"
                                             value={formData.startDate || ''}
-                                            onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                                            onChange={(e) => updateField('startDate', e.target.value)}
                                             className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500"
                                         />
                                     </div>
@@ -183,7 +95,7 @@ export default function ExperiencesClient({ initialData }: ExperiencesClientProp
                                             type="date"
                                             value={formData.endDate || ''}
                                             disabled={formData.current}
-                                            onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                                            onChange={(e) => updateField('endDate', e.target.value)}
                                             className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500 disabled:opacity-50"
                                         />
                                     </div>
@@ -192,7 +104,7 @@ export default function ExperiencesClient({ initialData }: ExperiencesClientProp
                                             <input
                                                 type="checkbox"
                                                 checked={formData.current || false}
-                                                onChange={(e) => setFormData({ ...formData, current: e.target.checked, endDate: e.target.checked ? null : formData.endDate })}
+                                                onChange={(e) => updateField('current', e.target.checked)}
                                                 className="w-4 h-4 rounded border-slate-600 text-teal-500 focus:ring-teal-500"
                                             />
                                             <span className="text-slate-300">Current Position</span>
@@ -204,7 +116,7 @@ export default function ExperiencesClient({ initialData }: ExperiencesClientProp
                                     <label className="block text-sm font-medium text-slate-400 mb-1">Description (Markdown supported)</label>
                                     <MarkdownEditor
                                         value={formData.description || ''}
-                                        onChange={(value) => setFormData({ ...formData, description: value })}
+                                        onChange={(value) => updateField('description', value)}
                                         height={200}
                                         placeholder="Describe your responsibilities and achievements..."
                                     />
@@ -241,7 +153,6 @@ export default function ExperiencesClient({ initialData }: ExperiencesClientProp
                                 </div>
                             </div>
                         ) : (
-                            /* Display View */
                             <div className="flex items-start justify-between">
                                 <div className="flex-1">
                                     <div className="flex items-center gap-2">

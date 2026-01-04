@@ -1,50 +1,44 @@
 import express from "express";
 import cors from "cors";
 import path from "path";
-import { portfolioRouter } from "./routes/portfolio.js";
-import { personalInfoRouter } from "./routes/personal-info.js";
-import { experiencesRouter } from "./routes/experiences.js";
-import { skillsRouter } from "./routes/skills.js";
-import { projectsRouter } from "./routes/projects.js";
-import { educationRouter } from "./routes/education.js";
-import { articlesRouter } from "./routes/articles.js";
-import { certificationsRouter } from "./routes/certifications.js";
-import { uploadRouter } from "./routes/upload.js";
+
+import { articleRoutes } from "./features/articles/index.js";
+import { certificationRoutes } from "./features/certifications/index.js";
+import { educationRoutes } from "./features/education/index.js";
+import { experienceRoutes } from "./features/experiences/index.js";
+import { personalInfoRoutes } from "./features/personal-info/index.js";
+import { portfolioRoutes } from "./features/portfolio/index.js";
+import { projectRoutes } from "./features/projects/index.js";
+import { skillRoutes } from "./features/skills/index.js";
+import { uploadRoutes } from "./features/upload/index.js";
+import { errorHandler } from "./shared/middleware/error-handler.middleware.js";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Middleware
 app.use(cors({
     origin: ["http://localhost:3005", "http://localhost:3000"],
     credentials: true,
 }));
 app.use(express.json());
 
-// Routes
-app.use("/api/portfolio", portfolioRouter);
-app.use("/api/personal-info", personalInfoRouter);
-app.use("/api/experiences", experiencesRouter);
-app.use("/api/skills", skillsRouter);
-app.use("/api/projects", projectsRouter);
-app.use("/api/education", educationRouter);
-app.use("/api/articles", articlesRouter);
-app.use("/api/certifications", certificationsRouter);
-app.use("/api/upload", uploadRouter);
+app.use("/api/portfolio", portfolioRoutes);
+app.use("/api/personal-info", personalInfoRoutes);
+app.use("/api/experiences", experienceRoutes);
+app.use("/api/skills", skillRoutes);
+app.use("/api/projects", projectRoutes);
+app.use("/api/education", educationRoutes);
+app.use("/api/articles", articleRoutes);
+app.use("/api/certifications", certificationRoutes);
+app.use("/api/upload", uploadRoutes);
 
-// Serve uploaded files
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
-// Health check
 app.get("/api/health", (req, res) => {
     res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
-// Error handler
-app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
-    console.error(err.stack);
-    res.status(500).json({ error: "Internal server error" });
-});
+app.use(errorHandler);
 
 app.listen(PORT, () => {
     console.log(`🚀 API server running at http://localhost:${PORT}`);

@@ -1,102 +1,28 @@
 'use client';
 
-import { useState } from 'react';
 import { Plus, Pencil, Trash2, X, Save, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import type { Education } from '@portfolio/shared';
-import { createEducation, updateEducation, deleteEducation } from '@/lib/api';
+import { useEducationForm } from '@/features/education';
 
 interface EducationClientProps {
     initialData: Education[];
 }
 
 export default function EducationClient({ initialData }: EducationClientProps) {
-    const [education, setEducation] = useState(initialData);
-    const [editingId, setEditingId] = useState<string | null>(null);
-    const [formData, setFormData] = useState<Partial<Education>>({});
-    const [saving, setSaving] = useState(false);
-    const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-
-    const handleEdit = (edu: Education) => {
-        setEditingId(edu.id);
-        setFormData(edu);
-        setMessage(null);
-    };
-
-    const handleAdd = () => {
-        const newEdu: Education = {
-            id: 'new-' + Date.now().toString(),
-            institution: '',
-            degree: '',
-            field: '',
-            startYear: new Date().getFullYear(),
-            endYear: null,
-            current: true,
-            description: '',
-        };
-        setEducation([newEdu, ...education]);
-        setEditingId(newEdu.id);
-        setFormData(newEdu);
-        setMessage(null);
-    };
-
-    const handleSave = async () => {
-        if (!editingId) return;
-
-        setSaving(true);
-        setMessage(null);
-
-        try {
-            const isNew = editingId.startsWith('new-');
-            let savedEdu: Education;
-
-            if (isNew) {
-                const { id, ...data } = formData as Education;
-                savedEdu = await createEducation(data);
-            } else {
-                savedEdu = await updateEducation(editingId, formData);
-            }
-
-            setEducation(education.map(edu =>
-                edu.id === editingId ? savedEdu : edu
-            ));
-            setEditingId(null);
-            setFormData({});
-            setMessage({ type: 'success', text: isNew ? 'Education added!' : 'Education updated!' });
-        } catch (error) {
-            console.error('Error saving:', error);
-            setMessage({ type: 'error', text: 'Failed to save. Please try again.' });
-        } finally {
-            setSaving(false);
-        }
-    };
-
-    const handleDelete = async (id: string) => {
-        if (!confirm('Are you sure you want to delete this education entry?')) return;
-
-        setSaving(true);
-        setMessage(null);
-
-        try {
-            if (!id.startsWith('new-')) {
-                await deleteEducation(id);
-            }
-            setEducation(education.filter(edu => edu.id !== id));
-            setMessage({ type: 'success', text: 'Education deleted!' });
-        } catch (error) {
-            console.error('Error deleting:', error);
-            setMessage({ type: 'error', text: 'Failed to delete. Please try again.' });
-        } finally {
-            setSaving(false);
-        }
-    };
-
-    const handleCancel = () => {
-        if (editingId?.startsWith('new-')) {
-            setEducation(education.filter(edu => edu.id !== editingId));
-        }
-        setEditingId(null);
-        setFormData({});
-    };
+    const {
+        education,
+        editingId,
+        formData,
+        saving,
+        message,
+        handleAdd,
+        handleEdit,
+        handleSave,
+        handleDelete,
+        handleCancel,
+        updateField,
+        setFormData,
+    } = useEducationForm(initialData);
 
     return (
         <div className="max-w-4xl mx-auto">
@@ -115,11 +41,10 @@ export default function EducationClient({ initialData }: EducationClientProps) {
                 </button>
             </div>
 
-            {/* Status Message */}
             {message && (
                 <div className={`flex items-center gap-2 p-4 rounded-lg mb-4 ${message.type === 'success'
-                        ? 'bg-green-500/10 text-green-400 border border-green-500/20'
-                        : 'bg-red-500/10 text-red-400 border border-red-500/20'
+                    ? 'bg-green-500/10 text-green-400 border border-green-500/20'
+                    : 'bg-red-500/10 text-red-400 border border-red-500/20'
                     }`}>
                     {message.type === 'success' ? <CheckCircle size={18} /> : <XCircle size={18} />}
                     {message.text}
@@ -136,7 +61,7 @@ export default function EducationClient({ initialData }: EducationClientProps) {
                                     <input
                                         type="text"
                                         value={formData.institution || ''}
-                                        onChange={(e) => setFormData({ ...formData, institution: e.target.value })}
+                                        onChange={(e) => updateField('institution', e.target.value)}
                                         className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500"
                                     />
                                 </div>
@@ -147,7 +72,7 @@ export default function EducationClient({ initialData }: EducationClientProps) {
                                         <input
                                             type="text"
                                             value={formData.degree || ''}
-                                            onChange={(e) => setFormData({ ...formData, degree: e.target.value })}
+                                            onChange={(e) => updateField('degree', e.target.value)}
                                             placeholder="Bachelor of Science"
                                             className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500"
                                         />
@@ -157,7 +82,7 @@ export default function EducationClient({ initialData }: EducationClientProps) {
                                         <input
                                             type="text"
                                             value={formData.field || ''}
-                                            onChange={(e) => setFormData({ ...formData, field: e.target.value })}
+                                            onChange={(e) => updateField('field', e.target.value)}
                                             placeholder="Computer Science"
                                             className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500"
                                         />
@@ -170,7 +95,7 @@ export default function EducationClient({ initialData }: EducationClientProps) {
                                         <input
                                             type="number"
                                             value={formData.startYear || ''}
-                                            onChange={(e) => setFormData({ ...formData, startYear: parseInt(e.target.value) })}
+                                            onChange={(e) => updateField('startYear', parseInt(e.target.value))}
                                             min={1950}
                                             max={2100}
                                             className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500"
@@ -182,7 +107,7 @@ export default function EducationClient({ initialData }: EducationClientProps) {
                                             type="number"
                                             value={formData.endYear || ''}
                                             disabled={formData.current}
-                                            onChange={(e) => setFormData({ ...formData, endYear: parseInt(e.target.value) })}
+                                            onChange={(e) => updateField('endYear', parseInt(e.target.value))}
                                             min={1950}
                                             max={2100}
                                             className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500 disabled:opacity-50"
@@ -205,7 +130,7 @@ export default function EducationClient({ initialData }: EducationClientProps) {
                                     <label className="block text-sm font-medium text-slate-400 mb-1">Description (optional)</label>
                                     <textarea
                                         value={formData.description || ''}
-                                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                        onChange={(e) => updateField('description', e.target.value)}
                                         rows={3}
                                         className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none"
                                     />
@@ -221,7 +146,7 @@ export default function EducationClient({ initialData }: EducationClientProps) {
                                         Cancel
                                     </button>
                                     <button
-                                        onClick={handleSave}
+                                        onClick={() => handleSave()}
                                         disabled={saving}
                                         className="flex items-center gap-2 px-4 py-2 bg-teal-500 text-slate-900 font-medium rounded-lg hover:bg-teal-400 transition-colors disabled:opacity-50"
                                     >
