@@ -51,8 +51,10 @@ A modern, full-stack portfolio website built with Next.js 15, React 19, and Expr
 - **Responsive Design** - Mobile-first approach with Tailwind CSS
 - **Dark/Light Theme** - System-aware theme switching
 - **Server-Side Rendering** - Optimized SEO with Next.js SSR
-- **Type Safety** - Full TypeScript implementation
-- **API Caching** - Efficient data fetching with caching strategies
+- **Type Safety** - Full TypeScript implementation with end-to-end types
+- **Layered Architecture** - Strict separation between Controller, Service, and Repository layers
+- **Runtime Validation** - Robust input validation using Zod schemas
+- **Markdown Support** - Rich text editing and rendering for articles and projects
 
 ---
 
@@ -67,7 +69,9 @@ A modern, full-stack portfolio website built with Next.js 15, React 19, and Expr
 | [Tailwind CSS](https://tailwindcss.com/) | 3.4 | Utility-first CSS framework |
 | [NextAuth.js](https://next-auth.js.org/) | 5.0 | Authentication library |
 | [Lucide React](https://lucide.dev/) | 0.460 | Icon library |
+| [MD Editor](https://github.com/uiwjs/react-md-editor) | 4.0 | Markdown editor for content management |
 | [jsPDF](https://github.com/parallax/jsPDF) | 3.x | PDF generation |
+| [Tailwind Merge](https://github.com/dcastil/tailwind-merge) | 3.4 | Efficient merging of Tailwind classes |
 
 ### Backend (`apps/api`)
 | Technology | Version | Purpose |
@@ -76,6 +80,7 @@ A modern, full-stack portfolio website built with Next.js 15, React 19, and Expr
 | [Prisma](https://www.prisma.io/) | 6.0 | ORM & database toolkit |
 | [MySQL](https://www.mysql.com/) | 8.0+ | Relational database |
 | [TypeScript](https://www.typescriptlang.org/) | 5.6 | Type-safe JavaScript |
+| [Zod](https://zod.dev/) | 3.x | Runtime schema validation |
 | [tsx](https://github.com/privatenumber/tsx) | 4.19 | TypeScript execution |
 | [Multer](https://github.com/expressjs/multer) | 2.0 | File upload middleware |
 | [CORS](https://github.com/expressjs/cors) | 2.8 | Cross-origin resource sharing |
@@ -87,62 +92,48 @@ A modern, full-stack portfolio website built with Next.js 15, React 19, and Expr
 
 ## 🏗 Project Architecture
 
+The project follows a **Feature-Sliced Design (FSD)** inspired architecture, ensuring a clear separation of concerns, high maintainability, and scalability.
+
+### Core Architectural Principles
+- **Feature-Sliced Structure**: Logic is organized by vertical features (e.g., projects, certificates) rather than technical layers.
+- **Controller-Service-Repository Pattern**: The backend enforces a strict separation:
+  - **Controllers**: Request/Response orchestration.
+  - **Services**: Business logic.
+  - **Repositories**: Database access (Prisma).
+  - **Validators**: Input schema validation (Zod/Joi).
+- **End-to-End Type Safety**: Shared types between frontend and backend via the `packages/shared` workspace.
+
+### Directory Structure
+
 ```
 portfolio/
 ├── apps/
-│   ├── web/                    # Next.js frontend application
-│   │   ├── app/
-│   │   │   ├── admin/          # Admin panel pages
-│   │   │   │   ├── articles/
-│   │   │   │   ├── certifications/
-│   │   │   │   ├── education/
-│   │   │   │   ├── experiences/
-│   │   │   │   ├── information/
-│   │   │   │   ├── projects/
-│   │   │   │   └── skills/
-│   │   │   ├── api/            # Next.js API routes
-│   │   │   │   └── resume/     # PDF resume generation
-│   │   │   ├── auth/           # Authentication pages
-│   │   │   └── page.tsx        # Homepage
+│   ├── web/                    # Next.js 15 Frontend
+│   │   ├── app/                # Next.js App Router folders
+│   │   ├── features/           # Feature-specific logic & hooks
+│   │   │   ├── projects/       # Example: Project feature
+│   │   │   │   ├── hooks/      # Feature-specific hooks
+│   │   │   │   └── index.ts    # Public API for the feature
 │   │   ├── components/
-│   │   │   ├── admin/          # Admin UI components
-│   │   │   └── presentational/ # Public site components
-│   │   │       ├── HeroSection.tsx
-│   │   │       ├── AboutSection.tsx
-│   │   │       ├── ExperienceSection.tsx
-│   │   │       ├── SkillsSection.tsx
-│   │   │       ├── ProjectsSection.tsx
-│   │   │       ├── EducationSection.tsx
-│   │   │       ├── CertificationsSection.tsx
-│   │   │       ├── ArticlesSection.tsx
-│   │   │       ├── ContactSection.tsx
-│   │   │       └── ...
-│   │   └── lib/                # Utility functions & auth config
+│   │   │   ├── admin/          # Global Admin UI components
+│   │   │   └── presentational/ # Global theme & layout components
+│   │   └── lib/                # Shared utilities (Auth, API client)
 │   │
-│   └── api/                    # Express backend application
-│       ├── prisma/
-│       │   ├── schema.prisma   # Database schema
-│       │   └── seed.ts         # Database seeding
-│       └── src/
-│           ├── index.ts        # Express server entry point
-│           ├── lib/            # Database client & utilities
-│           └── routes/         # API route handlers
-│               ├── personal-info.ts
-│               ├── experiences.ts
-│               ├── skills.ts
-│               ├── projects.ts
-│               ├── education.ts
-│               ├── certifications.ts
-│               ├── articles.ts
-│               ├── portfolio.ts
-│               └── upload.ts
+│   └── api/                    # Express.js Backend
+│       ├── src/
+│       │   ├── features/       # Vertical slices of business logic
+│       │   │   ├── projects/
+│       │   │   │   ├── controllers/
+│       │   │   │   ├── services/
+│       │   │   │   ├── repositories/
+│       │   │   │   ├── validators/
+│       │   │   │   ├── routes/
+│       │   │   │   └── types/
+│       │   ├── shared/         # Cross-cutting concerns (Middleware, Error handling)
+│       │   └── index.ts        # Server entry point
 │
 ├── packages/
-│   └── shared/                 # Shared types & utilities
-│
-├── package.json                # Root workspace configuration
-├── DEPLOYMENT.md               # VPS deployment guide
-└── README.md                   # This file
+│   └── shared/                 # Shared types, constants, and validators
 ```
 
 ### System Architecture Diagram
