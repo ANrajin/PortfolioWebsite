@@ -242,6 +242,7 @@ Rules:
 
 ## 14. Code Cleanliness (ZERO TOLERANCE)
 
+* ✅ Always execute the lint command to verify code quality.
 * ❌ No commented-out code
 * ❌ No dead logic
 * ❌ No AI explanation comments

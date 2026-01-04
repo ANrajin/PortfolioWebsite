@@ -1,4 +1,4 @@
-import { prisma } from "../../../lib/prisma.js";
+import { prisma } from "@/lib/prisma.js";
 import type { CertificationEntity } from "../types/certification.types.js";
 
 export interface CreateCertificationData {
@@ -13,7 +13,7 @@ export interface CreateCertificationData {
     mediaType?: string;
 }
 
-export interface UpdateCertificationData extends CreateCertificationData { }
+export type UpdateCertificationData = CreateCertificationData;
 
 function parseSkills(skills: unknown): string[] {
     if (Array.isArray(skills)) return skills as string[];

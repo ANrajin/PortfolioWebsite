@@ -33,4 +33,4 @@ export interface CreateEducationDto {
     description?: string;
 }
 
-export interface UpdateEducationDto extends CreateEducationDto { }
+export type UpdateEducationDto = CreateEducationDto;

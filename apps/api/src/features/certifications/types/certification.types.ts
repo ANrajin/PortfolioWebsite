@@ -39,4 +39,4 @@ export interface CreateCertificationDto {
     mediaType?: string;
 }
 
-export interface UpdateCertificationDto extends CreateCertificationDto { }
+export type UpdateCertificationDto = CreateCertificationDto;

@@ -1,6 +1,7 @@
 'use client';
 
 import { LogOut, User } from 'lucide-react';
+import Image from 'next/image';
 
 interface AdminHeaderProps {
     user?: {
@@ -21,10 +22,12 @@ export default function AdminHeader({ user }: AdminHeaderProps) {
                 {/* User Info */}
                 <div className="flex items-center gap-3">
                     {user?.image ? (
-                        <img
+                        <Image
                             src={user.image}
                             alt={user.name || 'User'}
-                            className="w-8 h-8 rounded-full border border-slate-700"
+                            width={32}
+                            height={32}
+                            className="rounded-full border border-slate-700"
                         />
                     ) : (
                         <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center">

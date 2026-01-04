@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { certificationService } from "../services/certification.service.js";
-import type { ApiResponse } from "../../../shared/types/api.types.js";
+import type { ApiResponse } from "@/shared/types/api.types.js";
 import type { CertificationDto } from "../types/certification.types.js";
 import type { CreateCertificationInput, UpdateCertificationInput } from "../validators/certification.validator.js";
 

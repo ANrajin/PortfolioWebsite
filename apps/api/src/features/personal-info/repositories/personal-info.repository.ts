@@ -1,4 +1,4 @@
-import { prisma } from "../../../lib/prisma.js";
+import { prisma } from "@/lib/prisma.js";
 import type { PersonalInfoEntity } from "../types/personal-info.types.js";
 
 export interface UpdatePersonalInfoData {

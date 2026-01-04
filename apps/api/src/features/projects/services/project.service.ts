@@ -1,5 +1,5 @@
 import { projectRepository } from "../repositories/project.repository.js";
-import { AppError } from "../../../shared/errors/app-error.js";
+import { AppError } from "@/shared/errors/app-error.js";
 import type { ProjectDto, ProjectEntity } from "../types/project.types.js";
 import type { CreateProjectInput, UpdateProjectInput } from "../validators/project.validator.js";
 

@@ -1,6 +1,6 @@
 import path from "path";
 import fs from "fs";
-import { AppError } from "../../../shared/errors/app-error.js";
+import { AppError } from "@/shared/errors/app-error.js";
 import type { UploadResultDto } from "../types/upload.types.js";
 
 const UPLOAD_DIR = path.join(process.cwd(), "uploads/certificates");

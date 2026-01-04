@@ -1,4 +1,4 @@
-import { prisma } from "../../../lib/prisma.js";
+import { prisma } from "@/lib/prisma.js";
 import type { ExperienceEntity } from "../types/experience.types.js";
 
 export interface CreateExperienceData {
@@ -11,7 +11,7 @@ export interface CreateExperienceData {
     technologies?: string[];
 }
 
-export interface UpdateExperienceData extends CreateExperienceData { }
+export type UpdateExperienceData = CreateExperienceData;
 
 function parseTechnologies(techs: unknown): string[] {
     if (Array.isArray(techs)) return techs as string[];

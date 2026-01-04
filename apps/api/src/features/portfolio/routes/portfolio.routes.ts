@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { portfolioController } from "../controllers/portfolio.controller.js";
-import { asyncHandler } from "../../../shared/utils/async-handler.js";
+import { asyncHandler } from "@/shared/utils/async-handler.js";
 
 export const portfolioRoutes = Router();
 

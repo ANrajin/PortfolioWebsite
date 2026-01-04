@@ -1,6 +1,7 @@
 'use client';
 
 import { User, MapPin, Briefcase } from 'lucide-react';
+import Image from 'next/image';
 import type { PersonalInfo } from '@portfolio/shared';
 
 interface AboutSectionProps {
@@ -18,12 +19,13 @@ const AboutSection: React.FC<AboutSectionProps> = ({ info }) => {
                     <div className="md:col-span-1 flex justify-center md:justify-start">
                         <div className="relative">
                             <div className="w-64 h-64 rounded-2xl overflow-hidden border-4 border-teal-500/30 shadow-2xl shadow-teal-500/20">
-                                <div className="w-full h-full bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center">
+                                <div className="relative w-full h-full bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center">
                                     {info.imageUrl ? (
-                                        <img
+                                        <Image
                                             src={info.imageUrl}
                                             alt={info.name}
-                                            className="w-full h-full object-cover"
+                                            fill
+                                            className="object-cover"
                                         />
                                     ) : (
                                         <User size={80} className="text-slate-500" />

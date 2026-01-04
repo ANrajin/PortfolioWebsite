@@ -1,4 +1,4 @@
-import { prisma } from "../../../lib/prisma.js";
+import { prisma } from "@/lib/prisma.js";
 import type { ArticleEntity } from "../types/article.types.js";
 
 export interface CreateArticleData {

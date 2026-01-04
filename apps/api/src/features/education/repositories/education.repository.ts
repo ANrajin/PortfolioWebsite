@@ -1,4 +1,4 @@
-import { prisma } from "../../../lib/prisma.js";
+import { prisma } from "@/lib/prisma.js";
 import type { EducationEntity } from "../types/education.types.js";
 
 export interface CreateEducationData {
@@ -11,7 +11,7 @@ export interface CreateEducationData {
     description?: string;
 }
 
-export interface UpdateEducationData extends CreateEducationData { }
+export type UpdateEducationData = CreateEducationData;
 
 export class EducationRepository {
     async findAll(): Promise<EducationEntity[]> {

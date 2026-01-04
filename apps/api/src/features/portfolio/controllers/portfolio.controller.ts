@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { portfolioService } from "../services/portfolio.service.js";
-import type { ApiResponse } from "../../../shared/types/api.types.js";
+import type { ApiResponse } from "@/shared/types/api.types.js";
 import type { PortfolioDto } from "../types/portfolio.types.js";
 
 export class PortfolioController {

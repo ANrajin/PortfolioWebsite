@@ -1,5 +1,5 @@
 import { articleRepository } from "../repositories/article.repository.js";
-import { AppError } from "../../../shared/errors/app-error.js";
+import { AppError } from "@/shared/errors/app-error.js";
 import type { ArticleDto, ArticleEntity } from "../types/article.types.js";
 import type { CreateArticleInput, UpdateArticleInput } from "../validators/article.validator.js";
 

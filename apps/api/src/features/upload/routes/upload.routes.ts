@@ -2,8 +2,8 @@ import { Router, Request } from "express";
 import multer from "multer";
 import path from "path";
 import { uploadController } from "../controllers/upload.controller.js";
-import { validate } from "../../../shared/middleware/validate.middleware.js";
-import { asyncHandler } from "../../../shared/utils/async-handler.js";
+import { validate } from "@/shared/middleware/validate.middleware.js";
+import { asyncHandler } from "@/shared/utils/async-handler.js";
 import { filenameParamSchema } from "../validators/upload.validator.js";
 
 const uploadDir = path.join(process.cwd(), "uploads/certificates");

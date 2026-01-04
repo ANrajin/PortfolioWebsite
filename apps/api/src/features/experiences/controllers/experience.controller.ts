@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { experienceService } from "../services/experience.service.js";
-import type { ApiResponse } from "../../../shared/types/api.types.js";
+import type { ApiResponse } from "@/shared/types/api.types.js";
 import type { ExperienceDto } from "../types/experience.types.js";
 import type { CreateExperienceInput, UpdateExperienceInput } from "../validators/experience.validator.js";
 

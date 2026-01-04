@@ -27,4 +27,4 @@ export interface CreateProjectDto {
     imageUrl?: string;
 }
 
-export interface UpdateProjectDto extends CreateProjectDto { }
+export type UpdateProjectDto = CreateProjectDto;

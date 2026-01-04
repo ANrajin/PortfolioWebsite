@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { ChevronDown } from 'lucide-react';
 import SocialLinks from './SocialLinks';
 
@@ -18,12 +18,12 @@ const HeroSection: React.FC<HeroSectionProps> = ({ name, title, tagline, socialL
     const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
     const [isDeleting, setIsDeleting] = useState(false);
 
-    const phrases = [
+    const phrases = useMemo(() => [
         'Building scalable applications',
         'Crafting elegant solutions',
         'Turning ideas into reality',
         'Writing clean code',
-    ];
+    ], []);
 
     useEffect(() => {
         const currentPhrase = phrases[currentPhraseIndex];

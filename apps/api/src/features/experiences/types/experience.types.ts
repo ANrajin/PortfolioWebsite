@@ -33,4 +33,4 @@ export interface CreateExperienceDto {
     technologies?: string[];
 }
 
-export interface UpdateExperienceDto extends CreateExperienceDto { }
+export type UpdateExperienceDto = CreateExperienceDto;

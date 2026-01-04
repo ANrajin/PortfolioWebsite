@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { skillService } from "../services/skill.service.js";
-import type { ApiResponse } from "../../../shared/types/api.types.js";
+import type { ApiResponse } from "@/shared/types/api.types.js";
 import type { SkillDto } from "../types/skill.types.js";
 import type { CreateSkillInput, UpdateSkillInput } from "../validators/skill.validator.js";
 
