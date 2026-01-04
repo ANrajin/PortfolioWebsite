@@ -1,5 +1,5 @@
 import { certificationRepository } from "../repositories/certification.repository.js";
-import { AppError } from "../../../shared/errors/app-error.js";
+import { AppError } from "@/shared/errors/app-error.js";
 import type { CertificationDto, CertificationEntity } from "../types/certification.types.js";
 import type { CreateCertificationInput, UpdateCertificationInput } from "../validators/certification.validator.js";
 

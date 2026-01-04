@@ -1,4 +1,4 @@
-import { prisma } from "../../../lib/prisma.js";
+import { prisma } from "@/lib/prisma.js";
 import type { SkillEntity } from "../types/skill.types.js";
 
 export interface CreateSkillData {
@@ -7,7 +7,7 @@ export interface CreateSkillData {
     proficiency?: number;
 }
 
-export interface UpdateSkillData extends CreateSkillData { }
+export type UpdateSkillData = CreateSkillData;
 
 export class SkillRepository {
     async findAll(): Promise<SkillEntity[]> {

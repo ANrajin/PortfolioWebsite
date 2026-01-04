@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { personalInfoService } from "../services/personal-info.service.js";
-import type { ApiResponse } from "../../../shared/types/api.types.js";
+import type { ApiResponse } from "@/shared/types/api.types.js";
 import type { PersonalInfoDto } from "../types/personal-info.types.js";
 import type { UpdatePersonalInfoInput } from "../validators/personal-info.validator.js";
 

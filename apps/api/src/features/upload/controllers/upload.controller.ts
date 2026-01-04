@@ -1,8 +1,8 @@
 import type { Request, Response } from "express";
 import { uploadService } from "../services/upload.service.js";
-import type { ApiResponse } from "../../../shared/types/api.types.js";
+import type { ApiResponse } from "@/shared/types/api.types.js";
 import type { UploadResultDto } from "../types/upload.types.js";
-import { AppError } from "../../../shared/errors/app-error.js";
+import { AppError } from "@/shared/errors/app-error.js";
 
 export class UploadController {
     upload(req: Request, res: Response<ApiResponse<UploadResultDto>>): void {

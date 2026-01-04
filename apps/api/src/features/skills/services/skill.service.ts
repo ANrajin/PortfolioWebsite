@@ -1,5 +1,5 @@
 import { skillRepository } from "../repositories/skill.repository.js";
-import { AppError } from "../../../shared/errors/app-error.js";
+import { AppError } from "@/shared/errors/app-error.js";
 import type { SkillDto, SkillEntity } from "../types/skill.types.js";
 import type { CreateSkillInput, UpdateSkillInput } from "../validators/skill.validator.js";
 

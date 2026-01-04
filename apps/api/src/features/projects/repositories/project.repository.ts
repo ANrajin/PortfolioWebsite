@@ -1,4 +1,4 @@
-import { prisma } from "../../../lib/prisma.js";
+import { prisma } from "@/lib/prisma.js";
 import type { ProjectEntity } from "../types/project.types.js";
 
 export interface CreateProjectData {
@@ -9,7 +9,7 @@ export interface CreateProjectData {
     imageUrl?: string;
 }
 
-export interface UpdateProjectData extends CreateProjectData { }
+export type UpdateProjectData = CreateProjectData;
 
 function parseTechnologies(techs: unknown): string[] {
     if (Array.isArray(techs)) return techs as string[];

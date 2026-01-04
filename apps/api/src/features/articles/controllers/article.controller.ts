@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { articleService } from "../services/article.service.js";
-import type { ApiResponse } from "../../../shared/types/api.types.js";
+import type { ApiResponse } from "@/shared/types/api.types.js";
 import type { ArticleDto } from "../types/article.types.js";
 import type { CreateArticleInput, UpdateArticleInput } from "../validators/article.validator.js";
 

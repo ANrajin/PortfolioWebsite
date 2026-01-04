@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { educationService } from "../services/education.service.js";
-import type { ApiResponse } from "../../../shared/types/api.types.js";
+import type { ApiResponse } from "@/shared/types/api.types.js";
 import type { EducationDto } from "../types/education.types.js";
 import type { CreateEducationInput, UpdateEducationInput } from "../validators/education.validator.js";
 

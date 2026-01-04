@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { skillController } from "../controllers/skill.controller.js";
-import { validate } from "../../../shared/middleware/validate.middleware.js";
-import { asyncHandler } from "../../../shared/utils/async-handler.js";
+import { validate } from "@/shared/middleware/validate.middleware.js";
+import { asyncHandler } from "@/shared/utils/async-handler.js";
 import { createSkillSchema, updateSkillSchema, skillIdParamSchema } from "../validators/skill.validator.js";
 
 export const skillRoutes = Router();

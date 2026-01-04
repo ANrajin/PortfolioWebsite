@@ -1,5 +1,5 @@
 import { experienceRepository } from "../repositories/experience.repository.js";
-import { AppError } from "../../../shared/errors/app-error.js";
+import { AppError } from "@/shared/errors/app-error.js";
 import type { ExperienceDto, ExperienceEntity } from "../types/experience.types.js";
 import type { CreateExperienceInput, UpdateExperienceInput } from "../validators/experience.validator.js";
 

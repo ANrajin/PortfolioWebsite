@@ -21,4 +21,4 @@ export interface CreateSkillDto {
     proficiency?: number;
 }
 
-export interface UpdateSkillDto extends CreateSkillDto { }
+export type UpdateSkillDto = CreateSkillDto;

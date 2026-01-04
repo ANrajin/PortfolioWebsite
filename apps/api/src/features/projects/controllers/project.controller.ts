@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { projectService } from "../services/project.service.js";
-import type { ApiResponse } from "../../../shared/types/api.types.js";
+import type { ApiResponse } from "@/shared/types/api.types.js";
 import type { ProjectDto } from "../types/project.types.js";
 import type { CreateProjectInput, UpdateProjectInput } from "../validators/project.validator.js";
 

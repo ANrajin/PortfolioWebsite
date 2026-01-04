@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { projectController } from "../controllers/project.controller.js";
-import { validate } from "../../../shared/middleware/validate.middleware.js";
-import { asyncHandler } from "../../../shared/utils/async-handler.js";
+import { validate } from "@/shared/middleware/validate.middleware.js";
+import { asyncHandler } from "@/shared/utils/async-handler.js";
 import { createProjectSchema, updateProjectSchema, projectIdParamSchema } from "../validators/project.validator.js";
 
 export const projectRoutes = Router();

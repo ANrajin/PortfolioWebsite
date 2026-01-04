@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { certificationController } from "../controllers/certification.controller.js";
-import { validate } from "../../../shared/middleware/validate.middleware.js";
-import { asyncHandler } from "../../../shared/utils/async-handler.js";
+import { validate } from "@/shared/middleware/validate.middleware.js";
+import { asyncHandler } from "@/shared/utils/async-handler.js";
 import {
     createCertificationSchema,
     updateCertificationSchema,
