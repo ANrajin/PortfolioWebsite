@@ -1,6 +1,7 @@
 'use client';
 
 import { ExternalLink, Calendar, BookOpen } from 'lucide-react';
+import Image from 'next/image';
 import type { Article } from '@portfolio/shared';
 
 interface ArticlesSectionProps {
@@ -41,12 +42,13 @@ const ArticlesSection: React.FC<ArticlesSectionProps> = ({ articles }) => {
                                 className="card group block"
                             >
                                 {/* Thumbnail or Icon */}
-                                <div className="h-40 bg-gradient-to-br from-slate-700 to-slate-800 rounded-lg mb-4 overflow-hidden flex items-center justify-center">
+                                <div className="relative h-40 bg-gradient-to-br from-slate-700 to-slate-800 rounded-lg mb-4 overflow-hidden flex items-center justify-center">
                                     {article.thumbnail ? (
-                                        <img
+                                        <Image
                                             src={article.thumbnail}
                                             alt={article.title}
-                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                            fill
+                                            className="object-cover group-hover:scale-105 transition-transform duration-500"
                                         />
                                     ) : (
                                         <BookOpen size={40} className="text-teal-500/30" />

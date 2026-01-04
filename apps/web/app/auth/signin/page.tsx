@@ -1,4 +1,5 @@
 import { signIn } from "@/auth";
+import Link from "next/link";
 
 export default function SignInPage() {
     return (
@@ -48,12 +49,12 @@ export default function SignInPage() {
 
                     {/* Back Link */}
                     <div className="mt-6 text-center">
-                        <a
+                        <Link
                             href="/"
                             className="text-sm text-slate-400 hover:text-teal-400 transition-colors"
                         >
                             ← Back to Portfolio
-                        </a>
+                        </Link>
                     </div>
                 </div>
 

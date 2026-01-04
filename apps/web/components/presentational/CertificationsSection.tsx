@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Award, ChevronDown, ChevronUp, ExternalLink, FileText, Image as ImageIcon, Calendar, Building2 } from 'lucide-react';
+import Image from 'next/image';
 import type { Certification } from '@portfolio/shared';
 
 // API URL for media files
@@ -131,10 +132,12 @@ const CertificationsSection: React.FC<CertificationsSectionProps> = ({ certifica
                                                             rel="noopener noreferrer"
                                                             className="inline-block"
                                                         >
-                                                            <img
+                                                            <Image
                                                                 src={getMediaUrl(cert.mediaUrl)}
                                                                 alt={`${cert.name} certificate`}
-                                                                className="max-w-xs rounded-lg border border-slate-700 hover:border-teal-500/50 transition-colors"
+                                                                width={320}
+                                                                height={240}
+                                                                className="rounded-lg border border-slate-700 hover:border-teal-500/50 transition-colors"
                                                             />
                                                         </a>
                                                     ) : (

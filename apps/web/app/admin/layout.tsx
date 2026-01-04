@@ -1,5 +1,6 @@
 import { auth, signOut } from "@/auth";
 import { redirect } from "next/navigation";
+import Image from "next/image";
 import AdminSidebar from "@/components/admin/Sidebar";
 import { LogOut, User } from "lucide-react";
 
@@ -31,10 +32,12 @@ export default async function AdminLayout({
                         {/* User Info */}
                         <div className="flex items-center gap-3">
                             {session.user.image ? (
-                                <img
+                                <Image
                                     src={session.user.image}
                                     alt={session.user.name || "User"}
-                                    className="w-8 h-8 rounded-full border border-slate-700"
+                                    width={32}
+                                    height={32}
+                                    className="rounded-full border border-slate-700"
                                 />
                             ) : (
                                 <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center">
