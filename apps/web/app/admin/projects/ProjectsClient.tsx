@@ -1,110 +1,29 @@
 'use client';
 
-import { useState } from 'react';
 import { Plus, Pencil, Trash2, X, Save, ExternalLink, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import type { Project } from '@portfolio/shared';
-import { createProject, updateProject, deleteProject } from '@/lib/api';
+import { useProjectForm } from '@/features/projects';
 
 interface ProjectsClientProps {
     initialData: Project[];
 }
 
 export default function ProjectsClient({ initialData }: ProjectsClientProps) {
-    const [projects, setProjects] = useState(initialData);
-    const [editingId, setEditingId] = useState<string | null>(null);
-    const [formData, setFormData] = useState<Partial<Project>>({});
-    const [techInput, setTechInput] = useState('');
-    const [saving, setSaving] = useState(false);
-    const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-
-    const handleEdit = (project: Project) => {
-        setEditingId(project.id);
-        setFormData(project);
-        setTechInput(project.technologies?.join(', ') || '');
-        setMessage(null);
-    };
-
-    const handleAdd = () => {
-        const newProject: Project = {
-            id: 'new-' + Date.now().toString(),
-            title: '',
-            description: '',
-            technologies: [],
-            imageUrl: '',
-        };
-        setProjects([newProject, ...projects]);
-        setEditingId(newProject.id);
-        setFormData(newProject);
-        setTechInput('');
-        setMessage(null);
-    };
-
-    const handleSave = async () => {
-        if (!editingId) return;
-
-        setSaving(true);
-        setMessage(null);
-
-        try {
-            const isNew = editingId.startsWith('new-');
-            let savedProject: Project;
-
-            if (isNew) {
-                const { id, ...data } = formData as Project;
-                savedProject = await createProject({
-                    ...data,
-                    technologies: techInput.split(',').map(t => t.trim()).filter(Boolean)
-                });
-            } else {
-                savedProject = await updateProject(editingId, {
-                    ...formData,
-                    technologies: techInput.split(',').map(t => t.trim()).filter(Boolean)
-                });
-            }
-
-            setProjects(projects.map(p =>
-                p.id === editingId ? savedProject : p
-            ));
-            setEditingId(null);
-            setFormData({});
-            setTechInput('');
-            setMessage({ type: 'success', text: isNew ? 'Project created!' : 'Project updated!' });
-        } catch (error) {
-            console.error('Error saving:', error);
-            setMessage({ type: 'error', text: 'Failed to save. Please try again.' });
-        } finally {
-            setSaving(false);
-        }
-    };
-
-    const handleDelete = async (id: string) => {
-        if (!confirm('Are you sure you want to delete this project?')) return;
-
-        setSaving(true);
-        setMessage(null);
-
-        try {
-            if (!id.startsWith('new-')) {
-                await deleteProject(id);
-            }
-            setProjects(projects.filter(p => p.id !== id));
-            setMessage({ type: 'success', text: 'Project deleted!' });
-        } catch (error) {
-            console.error('Error deleting:', error);
-            setMessage({ type: 'error', text: 'Failed to delete. Please try again.' });
-        } finally {
-            setSaving(false);
-        }
-    };
-
-    const handleCancel = () => {
-        if (editingId?.startsWith('new-')) {
-            setProjects(projects.filter(p => p.id !== editingId));
-        }
-        setEditingId(null);
-        setFormData({});
-        setTechInput('');
-    };
+    const {
+        projects,
+        editingId,
+        formData,
+        saving,
+        message,
+        techInput,
+        setTechInput,
+        handleAdd,
+        handleEdit,
+        handleSave,
+        handleDelete,
+        handleCancel,
+        updateField,
+    } = useProjectForm(initialData);
 
     return (
         <div className="max-w-4xl mx-auto">
@@ -123,7 +42,6 @@ export default function ProjectsClient({ initialData }: ProjectsClientProps) {
                 </button>
             </div>
 
-            {/* Status Message */}
             {message && (
                 <div className={`flex items-center gap-2 p-4 rounded-lg mb-4 ${message.type === 'success'
                     ? 'bg-green-500/10 text-green-400 border border-green-500/20'
@@ -144,7 +62,7 @@ export default function ProjectsClient({ initialData }: ProjectsClientProps) {
                                     <input
                                         type="text"
                                         value={formData.title || ''}
-                                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                                        onChange={(e) => updateField('title', e.target.value)}
                                         className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500"
                                     />
                                 </div>
@@ -153,7 +71,7 @@ export default function ProjectsClient({ initialData }: ProjectsClientProps) {
                                     <label className="block text-sm font-medium text-slate-400 mb-1">Description</label>
                                     <textarea
                                         value={formData.description || ''}
-                                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                        onChange={(e) => updateField('description', e.target.value)}
                                         rows={3}
                                         className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none"
                                     />
@@ -164,7 +82,7 @@ export default function ProjectsClient({ initialData }: ProjectsClientProps) {
                                     <input
                                         type="url"
                                         value={formData.link || ''}
-                                        onChange={(e) => setFormData({ ...formData, link: e.target.value })}
+                                        onChange={(e) => updateField('link', e.target.value)}
                                         placeholder="https://github.com/..."
                                         className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500"
                                     />

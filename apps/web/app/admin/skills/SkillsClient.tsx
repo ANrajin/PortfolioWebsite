@@ -1,10 +1,9 @@
 'use client';
 
-import { useState } from 'react';
-import { Plus, Trash2, Save, CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { Plus, Trash2, Loader2, CheckCircle, XCircle } from 'lucide-react';
 import type { Skill } from '@portfolio/shared';
 import { SKILL_CATEGORIES } from '@portfolio/shared';
-import { createSkill, deleteSkill } from '@/lib/api';
+import { useSkillForm } from '@/features/skills';
 
 interface SkillsClientProps {
     initialData: Skill[];
@@ -22,60 +21,17 @@ const categoryColors: Record<string, string> = {
 };
 
 export default function SkillsClient({ initialData }: SkillsClientProps) {
-    const [skills, setSkills] = useState(initialData);
-    const [newSkillName, setNewSkillName] = useState('');
-    const [newSkillCategory, setNewSkillCategory] = useState<CategoryKey>('frontend');
-    const [saving, setSaving] = useState(false);
-    const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-
-    // Group by category
-    const groupedSkills = skills.reduce((acc, skill) => {
-        if (!acc[skill.category]) {
-            acc[skill.category] = [];
-        }
-        acc[skill.category].push(skill);
-        return acc;
-    }, {} as Record<string, Skill[]>);
-
-    const handleAddSkill = async () => {
-        if (!newSkillName.trim()) return;
-
-        setSaving(true);
-        setMessage(null);
-
-        try {
-            const newSkill = await createSkill({
-                name: newSkillName.trim(),
-                category: newSkillCategory,
-                proficiency: 80,
-            });
-
-            setSkills([...skills, newSkill]);
-            setNewSkillName('');
-            setMessage({ type: 'success', text: 'Skill added!' });
-        } catch (error) {
-            console.error('Error adding skill:', error);
-            setMessage({ type: 'error', text: 'Failed to add skill.' });
-        } finally {
-            setSaving(false);
-        }
-    };
-
-    const handleDeleteSkill = async (id: string) => {
-        setSaving(true);
-        setMessage(null);
-
-        try {
-            await deleteSkill(id);
-            setSkills(skills.filter(s => s.id !== id));
-            setMessage({ type: 'success', text: 'Skill deleted!' });
-        } catch (error) {
-            console.error('Error deleting skill:', error);
-            setMessage({ type: 'error', text: 'Failed to delete skill.' });
-        } finally {
-            setSaving(false);
-        }
-    };
+    const {
+        groupedSkills,
+        newSkillName,
+        setNewSkillName,
+        newSkillCategory,
+        setNewSkillCategory,
+        saving,
+        message,
+        handleAdd,
+        handleDelete,
+    } = useSkillForm(initialData);
 
     return (
         <div className="max-w-4xl mx-auto">
@@ -86,18 +42,16 @@ export default function SkillsClient({ initialData }: SkillsClientProps) {
                 </div>
             </div>
 
-            {/* Status Message */}
             {message && (
                 <div className={`flex items-center gap-2 p-4 rounded-lg mb-4 ${message.type === 'success'
-                        ? 'bg-green-500/10 text-green-400 border border-green-500/20'
-                        : 'bg-red-500/10 text-red-400 border border-red-500/20'
+                    ? 'bg-green-500/10 text-green-400 border border-green-500/20'
+                    : 'bg-red-500/10 text-red-400 border border-red-500/20'
                     }`}>
                     {message.type === 'success' ? <CheckCircle size={18} /> : <XCircle size={18} />}
                     {message.text}
                 </div>
             )}
 
-            {/* Add New Skill */}
             <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 mb-6">
                 <h3 className="text-sm font-medium text-slate-400 mb-3">Add New Skill</h3>
                 <div className="flex gap-3">
@@ -107,7 +61,7 @@ export default function SkillsClient({ initialData }: SkillsClientProps) {
                         onChange={(e) => setNewSkillName(e.target.value)}
                         placeholder="Skill name (e.g., React)"
                         className="flex-1 px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500"
-                        onKeyDown={(e) => e.key === 'Enter' && !saving && handleAddSkill()}
+                        onKeyDown={(e) => e.key === 'Enter' && !saving && handleAdd()}
                         disabled={saving}
                     />
                     <select
@@ -121,7 +75,7 @@ export default function SkillsClient({ initialData }: SkillsClientProps) {
                         ))}
                     </select>
                     <button
-                        onClick={handleAddSkill}
+                        onClick={handleAdd}
                         disabled={saving || !newSkillName.trim()}
                         className="flex items-center gap-2 px-4 py-2 bg-teal-500 text-slate-900 font-medium rounded-lg hover:bg-teal-400 transition-colors disabled:opacity-50"
                     >
@@ -131,7 +85,6 @@ export default function SkillsClient({ initialData }: SkillsClientProps) {
                 </div>
             </div>
 
-            {/* Skills by Category */}
             <div className="space-y-6">
                 {Object.entries(SKILL_CATEGORIES).map(([category, label]) => {
                     const categorySkills = groupedSkills[category] || [];
@@ -148,7 +101,7 @@ export default function SkillsClient({ initialData }: SkillsClientProps) {
                                     >
                                         <span className="text-sm font-medium">{skill.name}</span>
                                         <button
-                                            onClick={() => handleDeleteSkill(skill.id)}
+                                            onClick={() => handleDelete(skill.id)}
                                             disabled={saving}
                                             className="opacity-0 group-hover:opacity-100 p-0.5 hover:bg-red-500/20 rounded-full transition-all disabled:opacity-50"
                                         >

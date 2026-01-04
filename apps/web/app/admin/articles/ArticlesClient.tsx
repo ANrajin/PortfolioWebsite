@@ -1,100 +1,27 @@
 'use client';
 
-import { useState } from 'react';
 import { Plus, Pencil, Trash2, X, Save, ExternalLink, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import type { Article } from '@portfolio/shared';
-import { createArticle, updateArticle, deleteArticle } from '@/lib/api';
+import { useArticleForm } from '@/features/articles';
 
 interface ArticlesClientProps {
     initialData: Article[];
 }
 
 export default function ArticlesClient({ initialData }: ArticlesClientProps) {
-    const [articles, setArticles] = useState(initialData);
-    const [editingId, setEditingId] = useState<string | null>(null);
-    const [formData, setFormData] = useState<Partial<Article>>({});
-    const [saving, setSaving] = useState(false);
-    const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-
-    const handleEdit = (article: Article) => {
-        setEditingId(article.id);
-        setFormData(article);
-        setMessage(null);
-    };
-
-    const handleAdd = () => {
-        const newArticle: Article = {
-            id: 'new-' + Date.now().toString(),
-            title: '',
-            platform: '',
-            url: '',
-            publishedDate: new Date().toISOString().split('T')[0],
-            thumbnail: '',
-        };
-        setArticles([newArticle, ...articles]);
-        setEditingId(newArticle.id);
-        setFormData(newArticle);
-        setMessage(null);
-    };
-
-    const handleSave = async () => {
-        if (!editingId) return;
-
-        setSaving(true);
-        setMessage(null);
-
-        try {
-            const isNew = editingId.startsWith('new-');
-            let savedArticle: Article;
-
-            if (isNew) {
-                const { id, ...data } = formData as Article;
-                savedArticle = await createArticle(data);
-            } else {
-                savedArticle = await updateArticle(editingId, formData);
-            }
-
-            setArticles(articles.map(a =>
-                a.id === editingId ? savedArticle : a
-            ));
-            setEditingId(null);
-            setFormData({});
-            setMessage({ type: 'success', text: isNew ? 'Article added!' : 'Article updated!' });
-        } catch (error) {
-            console.error('Error saving:', error);
-            setMessage({ type: 'error', text: 'Failed to save. Please try again.' });
-        } finally {
-            setSaving(false);
-        }
-    };
-
-    const handleDelete = async (id: string) => {
-        if (!confirm('Are you sure you want to delete this article?')) return;
-
-        setSaving(true);
-        setMessage(null);
-
-        try {
-            if (!id.startsWith('new-')) {
-                await deleteArticle(id);
-            }
-            setArticles(articles.filter(a => a.id !== id));
-            setMessage({ type: 'success', text: 'Article deleted!' });
-        } catch (error) {
-            console.error('Error deleting:', error);
-            setMessage({ type: 'error', text: 'Failed to delete. Please try again.' });
-        } finally {
-            setSaving(false);
-        }
-    };
-
-    const handleCancel = () => {
-        if (editingId?.startsWith('new-')) {
-            setArticles(articles.filter(a => a.id !== editingId));
-        }
-        setEditingId(null);
-        setFormData({});
-    };
+    const {
+        articles,
+        editingId,
+        formData,
+        saving,
+        message,
+        handleAdd,
+        handleEdit,
+        handleSave,
+        handleDelete,
+        handleCancel,
+        updateField,
+    } = useArticleForm(initialData);
 
     const formatDate = (dateStr: string) => {
         const date = new Date(dateStr);
@@ -118,11 +45,10 @@ export default function ArticlesClient({ initialData }: ArticlesClientProps) {
                 </button>
             </div>
 
-            {/* Status Message */}
             {message && (
                 <div className={`flex items-center gap-2 p-4 rounded-lg mb-4 ${message.type === 'success'
-                        ? 'bg-green-500/10 text-green-400 border border-green-500/20'
-                        : 'bg-red-500/10 text-red-400 border border-red-500/20'
+                    ? 'bg-green-500/10 text-green-400 border border-green-500/20'
+                    : 'bg-red-500/10 text-red-400 border border-red-500/20'
                     }`}>
                     {message.type === 'success' ? <CheckCircle size={18} /> : <XCircle size={18} />}
                     {message.text}
@@ -139,7 +65,7 @@ export default function ArticlesClient({ initialData }: ArticlesClientProps) {
                                     <input
                                         type="text"
                                         value={formData.title || ''}
-                                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                                        onChange={(e) => updateField('title', e.target.value)}
                                         className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500"
                                     />
                                 </div>
@@ -150,7 +76,7 @@ export default function ArticlesClient({ initialData }: ArticlesClientProps) {
                                         <input
                                             type="text"
                                             value={formData.platform || ''}
-                                            onChange={(e) => setFormData({ ...formData, platform: e.target.value })}
+                                            onChange={(e) => updateField('platform', e.target.value)}
                                             placeholder="Medium, Dev.to, Hashnode..."
                                             className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500"
                                         />
@@ -160,7 +86,7 @@ export default function ArticlesClient({ initialData }: ArticlesClientProps) {
                                         <input
                                             type="date"
                                             value={formData.publishedDate || ''}
-                                            onChange={(e) => setFormData({ ...formData, publishedDate: e.target.value })}
+                                            onChange={(e) => updateField('publishedDate', e.target.value)}
                                             className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500"
                                         />
                                     </div>
@@ -171,7 +97,7 @@ export default function ArticlesClient({ initialData }: ArticlesClientProps) {
                                     <input
                                         type="url"
                                         value={formData.url || ''}
-                                        onChange={(e) => setFormData({ ...formData, url: e.target.value })}
+                                        onChange={(e) => updateField('url', e.target.value)}
                                         placeholder="https://..."
                                         className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500"
                                     />

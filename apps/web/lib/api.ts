@@ -1,6 +1,28 @@
-import type { PortfolioData, PersonalInfo, Experience, Skill, Project, Education, Article } from "@portfolio/shared";
+import type { PortfolioData, PersonalInfo, Experience, Skill, Project, Education, Article, Certification } from "@portfolio/shared";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+
+interface ApiResponse<T> {
+    success: boolean;
+    data?: T;
+    error?: {
+        code: string;
+        message: string;
+        details?: Record<string, string[]>;
+    };
+}
+
+export class ApiError extends Error {
+    code: string;
+    details?: Record<string, string[]>;
+
+    constructor(code: string, message: string, details?: Record<string, string[]>) {
+        super(message);
+        this.code = code;
+        this.details = details;
+        this.name = "ApiError";
+    }
+}
 
 async function fetchAPI<T>(endpoint: string, options?: RequestInit): Promise<T> {
     const res = await fetch(`${API_URL}${endpoint}`, {
@@ -11,15 +33,21 @@ async function fetchAPI<T>(endpoint: string, options?: RequestInit): Promise<T> 
         },
     });
 
-    if (!res.ok) {
-        throw new Error(`API Error: ${res.status}`);
-    }
-
     if (res.status === 204) {
         return undefined as T;
     }
 
-    return res.json();
+    const json: ApiResponse<T> = await res.json();
+
+    if (!res.ok || !json.success) {
+        throw new ApiError(
+            json.error?.code || "UNKNOWN_ERROR",
+            json.error?.message || `API Error: ${res.status}`,
+            json.error?.details
+        );
+    }
+
+    return json.data as T;
 }
 
 // Portfolio
@@ -155,8 +183,6 @@ export async function deleteArticle(id: string): Promise<void> {
 }
 
 // Certifications
-import type { Certification } from "@portfolio/shared";
-
 export async function getCertifications(): Promise<Certification[]> {
     return fetchAPI<Certification[]>("/api/certifications");
 }
@@ -189,10 +215,15 @@ export async function uploadCertificateMedia(file: File): Promise<{ mediaUrl: st
         body: formData,
     });
 
-    if (!res.ok) {
-        throw new Error(`Upload Error: ${res.status}`);
+    const json: ApiResponse<{ mediaUrl: string; mediaType: string; filename: string }> = await res.json();
+
+    if (!res.ok || !json.success) {
+        throw new ApiError(
+            json.error?.code || "UPLOAD_ERROR",
+            json.error?.message || `Upload Error: ${res.status}`,
+            json.error?.details
+        );
     }
 
-    return res.json();
+    return json.data!;
 }
-
