@@ -227,3 +227,38 @@ export async function uploadCertificateMedia(file: File): Promise<{ mediaUrl: st
 
     return json.data!;
 }
+
+// Contact Form
+export interface ContactFormInput {
+    name: string;
+    email: string;
+    subject: string;
+    message: string;
+}
+
+export interface ContactFormResponse {
+    success: boolean;
+    message: string;
+}
+
+export async function submitContactForm(data: ContactFormInput): Promise<ContactFormResponse> {
+    const res = await fetch(`${API_URL}/api/contact`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+    });
+
+    const json = await res.json();
+
+    if (!res.ok) {
+        throw new ApiError(
+            json.error?.code || "CONTACT_ERROR",
+            json.error?.message || "Failed to send message. Please try again.",
+            json.error?.details
+        );
+    }
+
+    return json;
+}

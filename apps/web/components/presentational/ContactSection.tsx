@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { Mail, Phone, Send, MapPin } from 'lucide-react';
+import { Mail, Phone, Send, MapPin, CheckCircle, AlertCircle } from 'lucide-react';
 import SocialLinks from './SocialLinks';
+import { submitContactForm, ApiError } from '@/lib/api';
 
 import type { SocialLink } from '@portfolio/shared';
 
@@ -12,8 +13,15 @@ interface ContactSectionProps {
     socialLinks?: SocialLink[];
 }
 
+interface FormState {
+    name: string;
+    email: string;
+    subject: string;
+    message: string;
+}
+
 const ContactSection: React.FC<ContactSectionProps> = ({ email, phone, socialLinks }) => {
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<FormState>({
         name: '',
         email: '',
         subject: '',
@@ -21,19 +29,26 @@ const ContactSection: React.FC<ContactSectionProps> = ({ email, phone, socialLin
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitted, setSubmitted] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
+        setError(null);
 
-        // Simulate form submission
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
-        setIsSubmitting(false);
-        setSubmitted(true);
-        setFormData({ name: '', email: '', subject: '', message: '' });
-
-        setTimeout(() => setSubmitted(false), 5000);
+        try {
+            await submitContactForm(formData);
+            setSubmitted(true);
+            setFormData({ name: '', email: '', subject: '', message: '' });
+        } catch (err) {
+            if (err instanceof ApiError) {
+                setError(err.message);
+            } else {
+                setError('Something went wrong. Please try again later.');
+            }
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -41,6 +56,11 @@ const ContactSection: React.FC<ContactSectionProps> = ({ email, phone, socialLin
             ...prev,
             [e.target.name]: e.target.value,
         }));
+        if (error) setError(null);
+    };
+
+    const handleSendAnother = () => {
+        setSubmitted(false);
     };
 
     return (
@@ -102,15 +122,34 @@ const ContactSection: React.FC<ContactSectionProps> = ({ email, phone, socialLin
                     {/* Contact Form */}
                     <div className="card">
                         {submitted ? (
-                            <div className="flex flex-col items-center justify-center py-12 text-center">
-                                <div className="w-16 h-16 bg-teal-500/20 rounded-full flex items-center justify-center mb-4">
-                                    <Send size={32} className="text-teal-400" />
+                            <div className="flex flex-col items-center justify-center py-12 text-center animate-in fade-in zoom-in duration-500">
+                                <div className="w-20 h-20 bg-gradient-to-br from-teal-500/30 to-emerald-500/30 rounded-full flex items-center justify-center mb-6 animate-bounce">
+                                    <CheckCircle size={40} className="text-teal-400" />
                                 </div>
-                                <h3 className="text-xl font-semibold text-slate-100 mb-2">Message Sent!</h3>
-                                <p className="text-slate-400">Thank you for reaching out. I&apos;ll get back to you soon.</p>
+                                <h3 className="text-2xl font-bold text-slate-100 mb-3">Message Sent!</h3>
+                                <p className="text-slate-300 mb-2 max-w-sm">
+                                    Thank you for reaching out! Your message has been received.
+                                </p>
+                                <p className="text-slate-400 text-sm mb-6">
+                                    I&apos;ll get back to you as soon as possible.
+                                </p>
+                                <button
+                                    onClick={handleSendAnother}
+                                    className="text-teal-400 hover:text-teal-300 text-sm font-medium transition-colors flex items-center gap-2"
+                                >
+                                    <Send size={14} />
+                                    Send another message
+                                </button>
                             </div>
                         ) : (
                             <form onSubmit={handleSubmit} className="space-y-6">
+                                {error && (
+                                    <div className="flex items-start gap-3 p-4 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 animate-in slide-in-from-top duration-300">
+                                        <AlertCircle size={20} className="mt-0.5 flex-shrink-0" />
+                                        <p className="text-sm">{error}</p>
+                                    </div>
+                                )}
+
                                 <div className="grid sm:grid-cols-2 gap-4">
                                     <div>
                                         <label htmlFor="name" className="block text-sm font-medium text-slate-300 mb-2">
@@ -123,6 +162,7 @@ const ContactSection: React.FC<ContactSectionProps> = ({ email, phone, socialLin
                                             value={formData.name}
                                             onChange={handleChange}
                                             required
+                                            minLength={2}
                                             className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-lg text-slate-100 placeholder-slate-500 focus:outline-none focus:border-teal-500 transition-colors"
                                             placeholder="John Doe"
                                         />
@@ -155,6 +195,7 @@ const ContactSection: React.FC<ContactSectionProps> = ({ email, phone, socialLin
                                         value={formData.subject}
                                         onChange={handleChange}
                                         required
+                                        minLength={5}
                                         className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-lg text-slate-100 placeholder-slate-500 focus:outline-none focus:border-teal-500 transition-colors"
                                         placeholder="Project Inquiry"
                                     />
@@ -170,6 +211,7 @@ const ContactSection: React.FC<ContactSectionProps> = ({ email, phone, socialLin
                                         value={formData.message}
                                         onChange={handleChange}
                                         required
+                                        minLength={10}
                                         rows={5}
                                         className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-lg text-slate-100 placeholder-slate-500 focus:outline-none focus:border-teal-500 transition-colors resize-none"
                                         placeholder="Tell me about your project..."
