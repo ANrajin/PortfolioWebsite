@@ -37,7 +37,7 @@ A modern, full-stack portfolio website built with Next.js 15, React 19, and Expr
 - **Education Section** - Academic background
 - **Certifications** - Professional certifications with expandable details and credential links
 - **Articles/Publications** - Blog posts and external publications
-- **Contact Section** - Contact form with social media links
+- **Contact Section** - Dynamic contact form with email notifications and social media links
 - **PDF Resume Generation** - Dynamic resume generation via `/api/resume`
 
 ### Admin Panel
@@ -55,6 +55,7 @@ A modern, full-stack portfolio website built with Next.js 15, React 19, and Expr
 - **Layered Architecture** - Strict separation between Controller, Service, and Repository layers
 - **Runtime Validation** - Robust input validation using Zod schemas
 - **Markdown Support** - Rich text editing and rendering for articles and projects
+- **Email Queue System** - Background job processing with node-cron for reliable email delivery
 
 ---
 
@@ -84,6 +85,8 @@ A modern, full-stack portfolio website built with Next.js 15, React 19, and Expr
 | [tsx](https://github.com/privatenumber/tsx) | 4.19 | TypeScript execution |
 | [Multer](https://github.com/expressjs/multer) | 2.0 | File upload middleware |
 | [CORS](https://github.com/expressjs/cors) | 2.8 | Cross-origin resource sharing |
+| [Nodemailer](https://nodemailer.com/) | 6.9 | Email sending |
+| [node-cron](https://github.com/node-cron/node-cron) | 3.0 | Background job scheduling |
 
 ### Shared (`packages/shared`)
 - Shared TypeScript types and utilities between frontend and backend
@@ -235,7 +238,19 @@ DATABASE_URL="mysql://username:password@localhost:3306/portfolio"
 # Server
 PORT=3001
 NODE_ENV=development
+
+# SMTP Configuration (for contact form emails)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your-email@gmail.com
+SMTP_PASSWORD=your-app-password
+SMTP_SENDER_NAME=Portfolio Contact
+SMTP_SENDER_EMAIL=your-email@gmail.com
+SMTP_RECIPIENT_EMAIL=your-email@gmail.com
 ```
+
+> **Note**: For Gmail, use an [App Password](https://myaccount.google.com/apppasswords) instead of your regular password.
 
 ### Web (`apps/web/.env.local`)
 
@@ -360,6 +375,12 @@ AUTH_TRUST_HOST=true
 | POST | `/articles` | Create new article |
 | PUT | `/articles/:id` | Update article |
 | DELETE | `/articles/:id` | Delete article |
+
+### Contact
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/contact` | Submit contact form (queued for email delivery) |
 
 ### File Upload
 
