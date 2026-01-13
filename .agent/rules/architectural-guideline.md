@@ -256,5 +256,3 @@ Every line must add value.
 
 > **If a solution violates any rule above, it must be rejected and re-implemented.
 > Enterprise quality is mandatory, not optional.**
-
-Just tell me what you want next.
