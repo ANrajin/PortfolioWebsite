@@ -5,6 +5,7 @@ export const contactFormSchema = z.object({
     email: z.string().email("Invalid email address"),
     subject: z.string().min(5, "Subject must be at least 5 characters").max(200),
     message: z.string().min(10, "Message must be at least 10 characters").max(5000),
+    turnstileToken: z.string().optional(),
 });
 
 export type ContactFormInput = z.infer<typeof contactFormSchema>;

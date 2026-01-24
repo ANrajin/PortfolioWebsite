@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Mail, Phone, Send, MapPin, CheckCircle, AlertCircle } from 'lucide-react';
 import SocialLinks from './SocialLinks';
 import { submitContactForm, ApiError } from '@/lib/api';
+import { TurnstileWidget } from '@/features/turnstile';
 
 import type { SocialLink } from '@portfolio/shared';
 
@@ -20,6 +21,8 @@ interface FormState {
     message: string;
 }
 
+const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '';
+
 const ContactSection: React.FC<ContactSectionProps> = ({ email, phone, socialLinks }) => {
     const [formData, setFormData] = useState<FormState>({
         name: '',
@@ -30,19 +33,59 @@ const ContactSection: React.FC<ContactSectionProps> = ({ email, phone, socialLin
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitted, setSubmitted] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+    const [turnstileError, setTurnstileError] = useState<string | null>(null);
+
+    const isFormValid = formData.name.length >= 2 &&
+        formData.email.includes('@') &&
+        formData.subject.length >= 5 &&
+        formData.message.length >= 10;
+
+    const canSubmit = isFormValid && turnstileToken && !isSubmitting;
+
+    const handleTurnstileVerify = useCallback((token: string) => {
+        setTurnstileToken(token);
+        setTurnstileError(null);
+    }, []);
+
+    const handleTurnstileError = useCallback((errorMsg: string) => {
+        setTurnstileToken(null);
+        setTurnstileError(errorMsg);
+    }, []);
+
+    const handleTurnstileExpire = useCallback(() => {
+        setTurnstileToken(null);
+        setTurnstileError('Security verification expired. Please verify again.');
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (!turnstileToken) {
+            setError('Please complete the security verification.');
+            return;
+        }
+
         setIsSubmitting(true);
         setError(null);
 
         try {
-            await submitContactForm(formData);
+            await submitContactForm({
+                ...formData,
+                turnstileToken,
+            });
             setSubmitted(true);
             setFormData({ name: '', email: '', subject: '', message: '' });
+            setTurnstileToken(null);
         } catch (err) {
             if (err instanceof ApiError) {
-                setError(err.message);
+                // Check if it's a Turnstile verification error
+                if (err.details?.turnstileToken) {
+                    setTurnstileError(err.details.turnstileToken[0]);
+                    setTurnstileToken(null);
+                } else {
+                    setError(err.message);
+                }
             } else {
                 setError('Something went wrong. Please try again later.');
             }
@@ -61,6 +104,8 @@ const ContactSection: React.FC<ContactSectionProps> = ({ email, phone, socialLin
 
     const handleSendAnother = () => {
         setSubmitted(false);
+        setTurnstileToken(null);
+        setTurnstileError(null);
     };
 
     return (
@@ -218,9 +263,35 @@ const ContactSection: React.FC<ContactSectionProps> = ({ email, phone, socialLin
                                     />
                                 </div>
 
+                                {/* Turnstile Widget */}
+                                {TURNSTILE_SITE_KEY && (
+                                    <TurnstileWidget
+                                        siteKey={TURNSTILE_SITE_KEY}
+                                        onVerify={handleTurnstileVerify}
+                                        onError={handleTurnstileError}
+                                        onExpire={handleTurnstileExpire}
+                                    />
+                                )}
+
+                                {/* Show warning if Turnstile is not configured */}
+                                {!TURNSTILE_SITE_KEY && (
+                                    <div className="flex items-start gap-3 p-4 bg-amber-500/10 border border-amber-500/30 rounded-lg text-amber-400">
+                                        <AlertCircle size={20} className="mt-0.5 flex-shrink-0" />
+                                        <p className="text-sm">Security verification is not configured. Contact form may be vulnerable to spam.</p>
+                                    </div>
+                                )}
+
+                                {/* Show Turnstile error if any */}
+                                {turnstileError && (
+                                    <div className="flex items-start gap-3 p-4 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 animate-in slide-in-from-top duration-300">
+                                        <AlertCircle size={20} className="mt-0.5 flex-shrink-0" />
+                                        <p className="text-sm">{turnstileError}</p>
+                                    </div>
+                                )}
+
                                 <button
                                     type="submit"
-                                    disabled={isSubmitting}
+                                    disabled={!canSubmit && TURNSTILE_SITE_KEY !== ''}
                                     className="w-full btn-primary justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {isSubmitting ? (

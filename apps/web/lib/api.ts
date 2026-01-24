@@ -234,6 +234,7 @@ export interface ContactFormInput {
     email: string;
     subject: string;
     message: string;
+    turnstileToken?: string;
 }
 
 export interface ContactFormResponse {
