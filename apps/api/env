@@ -10,3 +10,6 @@ SMTP_PASSWORD=your-app-password
 SMTP_SENDER_NAME=Portfolio Contact
 SMTP_SENDER_EMAIL=your-email@gmail.com
 SMTP_RECIPIENT_EMAIL=your-email@gmail.com
+
+# Cloudflare Turnstile (for contact form spam protection)
+TURNSTILE_SECRET_KEY=your-turnstile-secret-key

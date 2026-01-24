@@ -54,4 +54,12 @@ export class AppError extends Error {
     static internal(message = "An unexpected error occurred"): AppError {
         return new AppError(ErrorCode.INTERNAL_ERROR, message);
     }
+
+    static badRequest(message: string, details?: Record<string, string[]>): AppError {
+        return new AppError(ErrorCode.BAD_REQUEST, message, details);
+    }
+
+    static forbidden(message: string, details?: Record<string, string[]>): AppError {
+        return new AppError(ErrorCode.FORBIDDEN, message, details);
+    }
 }
