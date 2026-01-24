@@ -1,4 +1,5 @@
 import { turnstileConfig } from "../config/turnstile.config.js";
+import { logger } from "@/shared/services/logger.js";
 import type {
     TurnstileVerificationResult,
     TurnstileSiteverifyResponse,
@@ -41,9 +42,9 @@ export class TurnstileService {
             });
 
             if (!response.ok) {
-                console.error(
-                    `[Turnstile] Siteverify API returned status: ${response.status}`
-                );
+                logger.turnstile.error("Siteverify API failed", {
+                    status: response.status,
+                });
                 return {
                     success: false,
                     errorCodes: ["bad-request"],
@@ -61,7 +62,9 @@ export class TurnstileService {
                 cdata: data.cdata,
             };
         } catch (error) {
-            console.error("[Turnstile] Verification request failed:", error);
+            logger.turnstile.error("Verification request failed", {
+                error: error instanceof Error ? error.message : String(error),
+            });
             return {
                 success: false,
                 errorCodes: ["internal-error"],
@@ -71,3 +74,4 @@ export class TurnstileService {
 }
 
 export const turnstileService = new TurnstileService();
+

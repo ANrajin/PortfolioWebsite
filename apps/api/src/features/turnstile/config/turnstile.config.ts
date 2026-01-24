@@ -1,7 +1,3 @@
-import { config } from "dotenv";
-
-config();
-
 interface TurnstileConfig {
     secretKey: string;
     verifyUrl: string;

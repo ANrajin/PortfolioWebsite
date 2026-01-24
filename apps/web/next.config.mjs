@@ -1,11 +1,25 @@
 /** @type {import('next').NextConfig} */
+const isDev = process.env.NODE_ENV !== 'production';
+
 const nextConfig = {
     transpilePackages: ['@portfolio/shared'],
     images: {
-        domains: ['localhost'],
+        remotePatterns: [
+            ...(isDev
+                ? [{ protocol: 'http', hostname: 'localhost' }]
+                : [{ protocol: 'https', hostname: 'rajin.dev' }]),
+        ],
         unoptimized: true,
     },
     async headers() {
+        const connectSrc = [
+            "'self'",
+            ...(isDev ? ['http://localhost:*'] : []),
+            'https://challenges.cloudflare.com',
+            'https://cloudflareinsights.com',
+            'https://static.cloudflareinsights.com',
+        ].join(' ');
+
         return [
             {
                 source: '/:path*',
@@ -19,7 +33,7 @@ const nextConfig = {
                             "font-src 'self' https://fonts.gstatic.com data:",
                             "img-src 'self' data: blob: https:",
                             "frame-src 'self' https://challenges.cloudflare.com",
-                            "connect-src 'self' http://localhost:* https://challenges.cloudflare.com https://cloudflareinsights.com https://static.cloudflareinsights.com",
+                            `connect-src ${connectSrc}`,
                         ].join('; '),
                     },
                 ],

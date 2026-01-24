@@ -24,6 +24,9 @@ export const metadata: Metadata = {
     description: 'Professional portfolio showcasing my work as a Software Engineer',
     keywords: ['Software Engineer', 'Portfolio', 'Developer', 'Full Stack'],
     authors: [{ name: 'Software Engineer' }],
+    icons: {
+        icon: '/favicon.ico',
+    },
 };
 
 export default function RootLayout({
